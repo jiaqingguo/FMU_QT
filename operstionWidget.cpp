@@ -1,8 +1,9 @@
 ﻿#include <QFileDialog>
-
 #include <QDebug>
 #include <fstream>
 #include <QDomDocument>
+#include <qmessagebox.h>
+#include "QtGui/private/qzipreader_p.h"
 
 
 #include "operstionWidget.h"
@@ -10,9 +11,14 @@
 #include "addValueDialog.h"
 #include "curveShowDialog.h"
 
+using namespace fmi4cpp;
+const double stepSize = 1;
+
 QMap<int,QString> operstionWidget::m_mapAlgorithmName;// 算法名称；
 QMap<int,QVector<QString>> operstionWidget::m_mapOutputPort={}; //输出端口;
 std::map<int,std::map<int,std::vector<double>>> operstionWidget::m_mapAllOutputData={};
+
+
 
 operstionWidget::operstionWidget(const int num,QWidget *parent) :m_iAlgorithmNum(num),
     QWidget(parent),
@@ -34,7 +40,7 @@ operstionWidget::operstionWidget(const int num,QWidget *parent) :m_iAlgorithmNum
 
 
     connect(ui->btn_choose,&QPushButton::clicked,this,&operstionWidget::slot_btnChooseFile);
-    connect(ui->btn_add_value,&QPushButton::clicked,this,&operstionWidget::slot_addInputValeu);
+    connect(ui->btn_clear_input,&QPushButton::clicked,this,&operstionWidget::slot_btn_clear_input);
     connect(ui->tableWidget_input,&QTableWidget::customContextMenuRequested,this,&operstionWidget::slot_tableWidgetCustomContextMenuRequested);
 
     connect(ui->tableWidget_output, SIGNAL(cellChanged(int ,int )), this, SLOT(slot_tableWigdetCheckedChanged(int , int )));
@@ -51,6 +57,33 @@ operstionWidget::~operstionWidget()
     m_mapAlgorithmName.remove(m_iAlgorithmNum);
     m_mapOutputPort.remove(m_iAlgorithmNum);
     m_mapAllOutputData.erase(m_iAlgorithmNum);
+}
+
+std::string operstionWidget::string_To_UTF8(const std::string& str)
+{
+    int nwLen = ::MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, NULL, 0);
+
+    wchar_t* pwBuf = new wchar_t[nwLen + 1];//一定要加1，不然会出现尾巴 
+    ZeroMemory(pwBuf, nwLen * 2 + 2);
+
+    ::MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.length(), pwBuf, nwLen);
+
+    int nLen = ::WideCharToMultiByte(CP_UTF8, 0, pwBuf, -1, NULL, NULL, NULL, NULL);
+
+    char* pBuf = new char[nLen + 1];
+    ZeroMemory(pBuf, nLen + 1);
+
+    ::WideCharToMultiByte(CP_UTF8, 0, pwBuf, nwLen, pBuf, nLen, NULL, NULL);
+
+    std::string retStr(pBuf);
+
+    delete[]pwBuf;
+    delete[]pBuf;
+
+    pwBuf = NULL;
+    pBuf = NULL;
+
+    return retStr;
 }
 
 bool operstionWidget::modifyFileFormat(const QString &strFliePath, const QString &strSavePath)
@@ -83,6 +116,7 @@ bool operstionWidget::modifyFileFormat(const QString &strFliePath, const QString
     outputFile.close();
 
     qDebug()<< "文件复制成功";
+    return true;
 }
 
 bool operstionWidget::decompressingFiles(const QString &strZipPath, const QString &strSavePath)
@@ -91,7 +125,7 @@ bool operstionWidget::decompressingFiles(const QString &strZipPath, const QStrin
 
     createFolder(strSavePath);
     QZipReader zipreader(strZipPath);
-       //reader.extractAll(path); // //可加可不加没有什么影响
+    //reader.extractAll(path); // //可加可不加没有什么影响
 
 
     for(auto fileInfo : zipreader.fileInfoList())
@@ -115,8 +149,8 @@ bool operstionWidget::decompressingFiles(const QString &strZipPath, const QStrin
        }
     }
 
-
-       zipreader.close();
+    zipreader.close();
+    return true;
 }
 
 bool operstionWidget::createFolder(const QString &folderPath)
@@ -202,21 +236,28 @@ bool operstionWidget::readXML(const QString strXmlPath)
 
         QDomElement root= doc.documentElement();//class结点
         //遍历每个student结点
-        QDomNodeList studentList=root.elementsByTagName("ScalarVariable");//通过标签名获取结点列表
+        QDomNodeList nodeList=root.elementsByTagName("ScalarVariable");//通过标签名获取结点列表
 
-        int listSize =studentList.size();
+        m_vecInputValueReference.clear();
+        m_vecOutputValueReference.clear();
+
+        int listSize = nodeList.size();
         for(int i = 0; i < listSize; ++i)
         {
-            QDomElement student = studentList.at(i).toElement();    //通过索引获取QDomElement对象
-            QString strName=student.attribute("name");                   //获取sex属性值
-            QString strCausality =student.attribute("causality");                  //获取age属性值
+            QDomElement element = nodeList.at(i).toElement();    //通过索引获取QDomElement对象
+            QString strName= element.attribute("name");                   //获取sex属性值
+
+            QString strValueReference = element.attribute("valueReference");
+            QString strCausality = element.attribute("causality");                  //获取age属性值
             if(strCausality=="input")
             {
                 m_vecInputPort.append(strName);
+                m_vecInputValueReference.push_back(strValueReference.toInt());
             }
             else if(strCausality=="output")
             {
                 m_mapOutputPort[m_iAlgorithmNum].append(strName);
+                m_vecOutputValueReference.push_back(strValueReference.toInt());
             }
 
         }
@@ -239,7 +280,7 @@ bool operstionWidget::readXML(const QString strXmlPath)
         for(int i=0;i<ui->tableWidget_output->columnCount();i++)
         {
             QTableWidgetItem *pItemPort = new QTableWidgetItem(m_mapOutputPort[m_iAlgorithmNum].at(i));
-            pItemPort->setCheckState(Qt::Checked);
+            pItemPort->setCheckState(Qt::Unchecked);
             ui->tableWidget_output->setItem(0,i,pItemPort);
 
             QTableWidgetItem *pItemValue = new QTableWidgetItem("");
@@ -273,10 +314,15 @@ void operstionWidget::slot_btnChooseFile()
     QString file_full, file_name, current_Path, file_path, file_suffix, complete_suffix, file_baseName, file_completeBaseName ;
     QFileInfo fileinfo; // <<------
     m_fileInfo =QFileDialog::getOpenFileName(this, "Open File", "QCoreApplication::applicationFilePath()",
-                                            "AllFile (*.*);;");
-    ui->label_algorithm->setText(m_fileInfo.fileName());
-    if(m_fileInfo.fileName().isEmpty())
+                                            "AllFile (*.fmu);;");
+    
+    if (m_fileInfo.fileName().isEmpty())
+    {
         return;
+    }
+       
+
+    ui->label_algorithm->setText(m_fileInfo.fileName());
     m_mapAlgorithmName[m_iAlgorithmNum]=m_fileInfo.fileName();
     qDebug()<< m_fileInfo.fileName()<<m_fileInfo.filePath();
 
@@ -314,9 +360,17 @@ void operstionWidget::slot_tableWigdetCheckedChanged(int row, int col)
     }
 }
 
-void operstionWidget::slot_addInputValeu()
+void operstionWidget::slot_btn_clear_input()
 {
+    for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
+    {
+        auto pItem = ui->tableWidget_input->item(1, i);
+        if (pItem)
+        {
+            pItem->setText("");
+        }
 
+    }
 }
 
 void operstionWidget::slot_tableWidgetCustomContextMenuRequested(const QPoint &pos)
@@ -339,10 +393,13 @@ void operstionWidget::slot_tableWidgetCustomContextMenuRequested(const QPoint &p
 
 void operstionWidget::slot_btnCalculate()
 {
+    if (m_mapAlgorithmName[m_iAlgorithmNum].isEmpty())
+    {
+        QMessageBox::critical(this, "提示", "请先选择算法");
+        return;
+    }
     m_iCalculateCount++;
-    ui->comboBox_countShow->addItem(QString::number(m_iCalculateCount));
-    int index =m_iCalculateCount-1;
-    ui->comboBox_countShow->setCurrentIndex(index);
+   
     //传入输出；
     std::vector<double> vecDoule;
     for(int i=0;i<ui->tableWidget_input->columnCount();i++)
@@ -359,8 +416,58 @@ void operstionWidget::slot_btnCalculate()
     }
 
     // 传给算法;
+  //  std::string exe_config_paths = "D:\\CS\\Anntena_System.fmu";//m_fileInfo.filePath().toStdString();
+    std::string exe_config_paths = m_fileInfo.absoluteFilePath().toStdString();
+    const std::string fmu_path = string_To_UTF8(exe_config_paths);
+    fmi2::fmu fmu(fmu_path);
+    auto cs_fmu = fmu.as_cs_fmu();
+    auto md = cs_fmu->get_model_description();
+    auto slave1 = cs_fmu->new_instance();
+    slave1->setup_experiment();
+    slave1->enter_initialization_mode();
+    slave1->exit_initialization_mode();
 
+
+    std::vector<fmi2Real> wef(m_vecInputValueReference.size());
+    std::vector<fmi2Real> ref(m_vecOutputValueReference.size());
+   
+
+    for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
+    {
+        auto pItem = ui->tableWidget_input->item(1, i);
+        if (pItem)
+        {
+            wef[i]=pItem->text().toDouble();
+        }
+        else
+        {
+            wef[i] = 0.0;
+        }
+    }
+
+
+    if (!slave1->write_real(m_vecInputValueReference, wef))
+    {
+        return;
+    }
+   
+    if (!slave1->step(stepSize))
+    {
+        return;
+    }
+    
+    if (!slave1->read_real(m_vecOutputValueReference, ref))
+    {
+        return;
+    }
+   
     // 接受算法输出进行显示;
+    m_mapAllOutputData[m_iAlgorithmNum][m_iCalculateCount] = ref;
+
+    ui->comboBox_countShow->addItem(QString::number(m_iCalculateCount));
+    int index = m_iCalculateCount - 1;
+    ui->comboBox_countShow->setCurrentIndex(index);
+   
 }
 
 void operstionWidget::slot_btnClear()
@@ -368,13 +475,22 @@ void operstionWidget::slot_btnClear()
     m_iCalculateCount=0;
     ui->comboBox_countShow->clear();
     m_mapAllOutputData.erase(m_iAlgorithmNum);
+    for (int i = 0; i < ui->tableWidget_output->columnCount(); i++)
+    {
+        auto pItem = ui->tableWidget_output->item(1, i);
+        if (pItem)
+        {
+            pItem->setText("");
+        }
+
+    }
 }
 
 void operstionWidget::slot_btnCurveShow()
 {
     if(m_setOutputIndex.isEmpty())
     {
-        qDebug()<< "未勾选显示输出位";
+        QMessageBox::critical(this, "提示","请先勾选要显示的输出位！");
         return;
     }
     const auto &mapData=m_mapAllOutputData[m_iAlgorithmNum];
@@ -391,20 +507,21 @@ void operstionWidget::slot_btnCurveShow()
     dialog.setCurveSHowData(m_iCalculateCount,mapShowData);
     dialog.exec();
 
-
 }
 
-void operstionWidget::slot_comboxPaiNumChanged()
+void operstionWidget::slot_comboxPaiNumChanged(int index)
 {
     int iPaiNum = ui->comboBox_countShow->currentText().toInt();
     auto vecData = m_mapAllOutputData[m_iAlgorithmNum][iPaiNum];
+    if (vecData.size() <= 0)
+        return;
     if(vecData.size() < m_mapOutputPort[m_iAlgorithmNum].size())
     {
         qDebug()<<"!!!!!!!输出结果位数可能有问题";
     }
     for(int i=0;i<ui->tableWidget_output->columnCount();i++)
     {
-        auto pItem = ui->tableWidget_output->item(0,i);
+        auto pItem = ui->tableWidget_output->item(1,i);
         if(pItem)
         {
           pItem->setText(QString::number(vecData.at(i)));

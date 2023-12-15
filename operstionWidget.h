@@ -5,8 +5,8 @@
 #include <QFileInfo>
 #include <QFile>
 #include <QSet>
-#include "QtGui/private/qzipreader_p.h"
 
+#include "fmi4cpp/fmi4cpp.hpp"
 
 namespace Ui {
 class operstionWidget;
@@ -20,7 +20,7 @@ public:
     explicit operstionWidget(const int num,QWidget *parent = nullptr);
     ~operstionWidget();
 
-
+    std::string string_To_UTF8(const std::string& str);
     bool modifyFileFormat(const QString &strFliePath,const QString &strSavePath);
     bool decompressingFiles(const QString &strZipPath,const QString &strSavePath);
     bool createFolder(const QString &folderPath);
@@ -31,12 +31,13 @@ public:
 private slots:
     void slot_btnChooseFile();
     void slot_tableWigdetCheckedChanged(int row, int col);
-    void slot_addInputValeu();
+    void slot_btn_clear_input();
     void slot_tableWidgetCustomContextMenuRequested(const QPoint &pos);
     void slot_btnCalculate();
     void slot_btnClear();
     void slot_btnCurveShow();
-    void slot_comboxPaiNumChanged();
+
+    void slot_comboxPaiNumChanged(int index);
 private:
     Ui::operstionWidget *ui;
     int m_iAlgorithmNum=0;// 算法顺序数;
@@ -45,6 +46,10 @@ private:
     QSet<int> m_setOutputIndex;
 
     int m_iCalculateCount =0;
+
+    std::vector<fmi2ValueReference> m_vecInputValueReference;
+
+    std::vector<fmi2ValueReference> m_vecOutputValueReference; 
 
 
    static QMap<int,QString> m_mapAlgorithmName;// 算法名称；

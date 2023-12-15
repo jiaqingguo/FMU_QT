@@ -1,4 +1,4 @@
-#include <QGridLayout>
+﻿#include <QGridLayout>
 #include <QtCharts/QSplineSeries>
 
 #include "curveShowDialog.h"
@@ -26,12 +26,13 @@ curveShowDialog::curveShowDialog(QWidget *parent) :
     m_pChart->addAxis(m_pAxisY,Qt::AlignLeft);
 
     //m_pAxisX->setTickCount(5); // 分成多少格;
-    m_pAxisX->setTitleText("X Axis");
+    m_pAxisX->setTitleText(QString::fromLocal8Bit("拍数"));
     m_pAxisX->setMinorTickCount(0);  // 禁用次要刻度
     m_pAxisX->setTickType(QtCharts::QValueAxis::TickType::TicksDynamic);  // 动态刻度
     m_pAxisX->setTickInterval(2);  // 设置刻度间隔为2
     m_pAxisX->setRange(0, 10);
 
+    m_pAxisY->setTitleText(QString::fromLocal8Bit("输出值"));
     m_pAxisY->setRange(0, 20);
 
 }
@@ -55,7 +56,7 @@ void curveShowDialog::setCurveSHowData(const int paiNUm,const QMap<int, QVector<
        ser->setName(strName);
 
        // 线条添加数据;
-       for(int i =0;i<=itor.value().size();i++)
+       for(int i =0;i< paiNUm;i++)
        {
            ser->append(i,itor.value().at(i));
        }

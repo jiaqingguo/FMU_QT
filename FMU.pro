@@ -2,7 +2,8 @@ QT       += core gui gui-private xml charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG += c++11
+CONFIG += c++17
+DEFINES += NOMINMAX
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
@@ -38,3 +39,16 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/fmu/lib/ -lfmi4cpp
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/fmu/lib/ -lfmi4cppd
+else:unix: LIBS += -L$$PWD/fmu/lib/ -lfmi4cpp
+
+INCLUDEPATH += $$PWD/fmu/include
+DEPENDPATH += $$PWD/fmu/include
+
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/fmu/lib/libfmi4cpp.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/fmu/lib/libfmi4cppd.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/fmu/lib/fmi4cpp.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/fmu/lib/fmi4cppd.lib
+else:unix: PRE_TARGETDEPS += $$PWD/fmu/lib/libfmi4cpp.a

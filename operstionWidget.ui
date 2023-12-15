@@ -73,9 +73,9 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QPushButton" name="btn_add_value">
+         <widget class="QPushButton" name="btn_clear_input">
           <property name="text">
-           <string>添加数值</string>
+           <string>清空输入</string>
           </property>
          </widget>
         </item>
