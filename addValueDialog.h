@@ -26,6 +26,8 @@ private slots:
     void slot_algorithmNameChanged(int index);
     void slot_paiNumChanged(int index);
     void slot_portNameChanged(int index);
+    void slot_btnOK();
+    void slot_btnCancle();
 private:
     Ui::addValueDialog *ui;
     QMap<int,QString> m_mapAlgorithmName;// 算法名称；

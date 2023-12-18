@@ -45,6 +45,11 @@ curveShowDialog::~curveShowDialog()
 void curveShowDialog::setCurveSHowData(const int paiNUm,const QMap<int, QVector<double> > mapData)
 {
 
+    // 确定x轴 y轴的最大值最小值;
+
+    double min = 0;
+    double max = 0;
+
     m_pAxisX->setRange(0,paiNUm>10? paiNUm:10);
     for(  auto itor = mapData.begin();itor!=mapData.end();itor++)
     {
@@ -55,12 +60,24 @@ void curveShowDialog::setCurveSHowData(const int paiNUm,const QMap<int, QVector<
        QString strName ="["+QString::number(itor.key())+"]";
        ser->setName(strName);
 
+       int x = 0;
        // 线条添加数据;
        for(int i =0;i< paiNUm;i++)
        {
-           ser->append(i,itor.value().at(i));
+           x=i + 1;
+           ser->append(x,itor.value().at(i));
+
+           if (max > itor.value().at(i))
+           {
+               max = itor.value().at(i);
+           }
+           if (min < itor.value().at(i))
+           {
+               min = itor.value().at(i);
+           }
        }
 
+       m_pAxisY->setRange(min, max);
        //放入charts里
        m_pChart->addSeries(ser);
        //将线条放入表中

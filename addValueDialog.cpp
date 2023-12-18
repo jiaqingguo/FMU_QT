@@ -12,7 +12,8 @@ addValueDialog::addValueDialog(QWidget *parent) :
     connect(ui->comboBox_portName,SIGNAL(currentIndexChanged(int)),this,SLOT(slot_portNameChanged(int)));
     connect(ui->comboBox_algorithmName,SIGNAL(currentIndexChanged(int)),this,SLOT(slot_algorithmNameChanged(int)));
     connect(ui->comboBox_count,SIGNAL(currentIndexChanged(int)),this,SLOT(slot_paiNumChanged(int)));
-
+    connect(ui->btn_ok, &QPushButton::clicked, this, &addValueDialog::slot_btnOK);
+    connect(ui->btn_cancle, &QPushButton::clicked, this, &addValueDialog::slot_btnCancle);
 }
 
 addValueDialog::~addValueDialog()
@@ -28,30 +29,51 @@ void addValueDialog::init()
         ui->comboBox_algorithmName->addItem(itor.value(),itor.key());
     }
     int iAlgorithmNum = ui->comboBox_algorithmName->currentData(Qt::UserRole).toInt();
+
+    // 初始化端口；
+    if (m_mapOutputPort.find(iAlgorithmNum) == m_mapOutputPort.end())
+    {
+        ui->comboBox_portName->clear();
+    }
+    else
+    {
+        auto& vecPort = m_mapOutputPort[iAlgorithmNum];
+        ui->comboBox_portName->clear();
+        for (auto& protData : vecPort)
+        {
+            ui->comboBox_portName->addItem(protData);
+        }
+    }
+
     // 初始化拍数；
-     auto &vecOutputData= m_mapAllOutputData.at(iAlgorithmNum);
-
-    for(auto & paiNum : vecOutputData)
+    if (m_mapAllOutputData.find(iAlgorithmNum) == m_mapAllOutputData.end())
     {
-        ui->comboBox_count->addItem(QString::number(paiNum.first));
+        ui->comboBox_count->clear();
+        ui->label_value->setText("");
     }
-
-    // 初始化端口
-    auto &vecPort =m_mapOutputPort[iAlgorithmNum];
-    if(vecPort.isEmpty())
-        return;
-    for(auto & protData : vecPort)
+    else
     {
-        ui->comboBox_portName->addItem(protData);
+        auto& vecOutputData = m_mapAllOutputData.at(iAlgorithmNum);
+        ui->comboBox_count->clear();
+        for (auto& paiNum : vecOutputData)
+        {
+            ui->comboBox_count->addItem(QString::number(paiNum.first));
+        }
+
+        // 初始化显示数值;
+        int paiNum = ui->comboBox_count->currentText().toInt();
+        if (vecOutputData.find(paiNum) == vecOutputData.end())
+        {
+            ui->label_value->setText("");
+        }
+        else
+        {
+            double value = vecOutputData[paiNum].at(ui->comboBox_portName->currentIndex());
+            ui->label_value->setText(QString::number(value));
+        }
     }
-    if(vecPort.isEmpty())
-        return;
-    if(vecOutputData.size()<=0)
-        return;
-    // 初始化显示数值;
-    int paiNum = ui->comboBox_count->currentText().toInt();
-    double value = vecOutputData[paiNum].at(ui->comboBox_portName->currentIndex());
-    ui->label_value->setText(QString::number(value));
+  
+   
 }
 
 void addValueDialog::setAlgorithmName(const QMap<int, QString> &mapAlgorithmName)
@@ -76,79 +98,153 @@ QString addValueDialog::getInputValue()
 
 void addValueDialog::slot_algorithmNameChanged(int index)
 {
-    if (index <= 0)
+    if (index < 0)
         return;
     int iAlgorithmNum = ui->comboBox_algorithmName->currentData(Qt::UserRole).toInt();
+
+    // 初始化端口；
+    if (m_mapOutputPort.find(iAlgorithmNum) == m_mapOutputPort.end())
+    {
+        ui->comboBox_portName->clear();
+    }
+    else
+    {
+        ui->comboBox_portName->clear();
+        auto& vecPort = m_mapOutputPort[iAlgorithmNum];
+        for (auto& protData : vecPort)
+        {
+            ui->comboBox_portName->addItem(protData);
+        }
+    }
+
     // 初始化拍数；
-     auto &vecOutputData=m_mapAllOutputData.at(iAlgorithmNum);
+    if (m_mapAllOutputData.find(iAlgorithmNum) == m_mapAllOutputData.end())
+    {
+        ui->comboBox_count->clear();
+        ui->label_value->setText("");
+    }
+    else
+    {
+        auto& vecOutputData = m_mapAllOutputData.at(iAlgorithmNum);
+        ui->comboBox_count->clear();
+        for (auto& paiNum : vecOutputData)
+        {
+            ui->comboBox_count->addItem(QString::number(paiNum.first));
+        }
+
+        // 初始化显示数值;
+        int paiNum = ui->comboBox_count->currentText().toInt();
+        if (vecOutputData.find(paiNum) == vecOutputData.end())
+        {
+            ui->label_value->setText("");
+        }
+        else
+        {
+            double value = vecOutputData[paiNum].at(ui->comboBox_portName->currentIndex());
+            ui->label_value->setText(QString::number(value));
+        }
+       
+    }
+
+
+    // 初始化拍数；
+ /*    auto &vecOutputData=m_mapAllOutputData.at(iAlgorithmNum);
     ui->comboBox_count->clear();
     for(auto & paiNum : vecOutputData)
     {
         ui->comboBox_count->addItem(QString::number(paiNum.first));
-    }
+    }*/
 
-    // 初始化端口
-    auto &vecPort =m_mapOutputPort[iAlgorithmNum];
-    ui->comboBox_portName->clear();
-    for(auto & protData : vecPort)
-    {
-        ui->comboBox_portName->addItem(protData);
-    }
+    //// 初始化端口
+    //auto &vecPort =m_mapOutputPort[iAlgorithmNum];
+    //ui->comboBox_portName->clear();
+    //for(auto & protData : vecPort)
+    //{
+    //    ui->comboBox_portName->addItem(protData);
+    //}
 
-    ui->label_value->clear();
-    if(vecPort.isEmpty())
-        return;
-    if(vecOutputData.size()<=0)
-        return;
-    // 初始化显示数值;
-    int paiNum = ui->comboBox_count->currentIndex() + 1;
-    int protIndex = ui->comboBox_portName->currentIndex();
-    if (protIndex > vecOutputData[paiNum].size())
-        return;
-    double value = vecOutputData[paiNum].at(protIndex);
+    //ui->label_value->clear();
+    //if(vecPort.isEmpty())
+    //    return;
+    //if(vecOutputData.size()<=0)
+    //    return;
+    //// 初始化显示数值;
+    //int paiNum = ui->comboBox_count->currentIndex() + 1;
+    //int protIndex = ui->comboBox_portName->currentIndex();
+    //if (protIndex > vecOutputData[paiNum].size())
+    //    return;
+    //double value = vecOutputData[paiNum].at(protIndex);
    
-    ui->label_value->setText(QString::number(value));
+    //ui->label_value->setText(QString::number(value));
 }
 
 void addValueDialog::slot_paiNumChanged(int index)
 {
-    if (index <= 0)
+    if (index < 0)
         return;
     int iAlgorithmNum = ui->comboBox_algorithmName->currentData(Qt::UserRole).toInt();
 
-    auto &vecOutputData=m_mapAllOutputData.at(iAlgorithmNum);
+    if (m_mapAllOutputData.find(iAlgorithmNum) == m_mapAllOutputData.end())
+    {
+        ui->label_value->setText("");
+    }
+    else
+    {
+        auto& vecOutputData = m_mapAllOutputData.at(iAlgorithmNum);
 
-    ui->label_value->clear();
+        int paiNum = ui->comboBox_count->currentIndex() + 1;
+        int protIndex = ui->comboBox_portName->currentIndex();
 
-    if(vecOutputData.size()<=0)
-        return;
-    // 改变显示数值;
-    int paiNum = ui->comboBox_count->currentIndex() +1;
-    int protIndex = ui->comboBox_portName->currentIndex();
+        if (vecOutputData.find(paiNum) == vecOutputData.end())
+        {
+            ui->label_value->setText("");
+        }
+        else
+        {
+            double value = vecOutputData[paiNum].at(protIndex);
+            ui->label_value->setText(QString::number(value));
+        }
+    }
     
-    if (protIndex > vecOutputData[paiNum].size())
-        return;
-    double value = vecOutputData[paiNum].at(protIndex);
-    ui->label_value->setText(QString::number(value));
 }
 
 void addValueDialog::slot_portNameChanged(int index)
 {
-    if (index <= 0)
+    if (index < 0)
         return;
     int iAlgorithmNum = ui->comboBox_algorithmName->currentData(Qt::UserRole).toInt();
 
-    auto &vecOutputData= m_mapAllOutputData.at(iAlgorithmNum);
-    ui->label_value->clear();
+    if (m_mapAllOutputData.find(iAlgorithmNum) == m_mapAllOutputData.end())
+    {
+        ui->label_value->setText("");
+    }
+    else
+    {
+        auto& vecOutputData = m_mapAllOutputData.at(iAlgorithmNum);
 
-    if(vecOutputData.size()<=0)
-        return;
-    // 改变显示数值;
-    int paiNum = ui->comboBox_count->currentIndex() + 1;
-    int protIndex = ui->comboBox_portName->currentIndex();
-    if (protIndex > vecOutputData[paiNum].size())
-        return;
-    double value = vecOutputData[paiNum].at(protIndex);
-    ui->label_value->setText(QString::number(value));
+        int paiNum = ui->comboBox_count->currentIndex() + 1;
+        int protIndex = ui->comboBox_portName->currentIndex();
 
+        if (vecOutputData.find(paiNum) == vecOutputData.end())
+        {
+            ui->label_value->setText("");
+        }
+        else
+        {
+            double value = vecOutputData[paiNum].at(protIndex);
+            ui->label_value->setText(QString::number(value));
+        }
+
+    }
+
+}
+
+void addValueDialog::slot_btnOK()
+{
+    this->accept();
+}
+
+void addValueDialog::slot_btnCancle()
+{
+    this->close();
 }

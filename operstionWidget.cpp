@@ -217,7 +217,7 @@ bool operstionWidget::readXML(const QString strXmlPath)
         if(!file.open(QIODevice::ReadOnly))
         {
             qDebug()<<"xml File open faild!";
-            return-1;
+            return false;
         }
 
         //2、创建QDomDocument对象，用于解析XML
@@ -226,7 +226,7 @@ bool operstionWidget::readXML(const QString strXmlPath)
         if(!doc.setContent(&file))
         {
             file.close();
-            return -1;
+            return false;
         }
         //关闭文件
         file.close();
@@ -395,9 +395,16 @@ void operstionWidget::slot_btnCalculate()
 {
     if (m_mapAlgorithmName[m_iAlgorithmNum].isEmpty())
     {
-        QMessageBox::critical(this, "提示", "请先选择算法");
+        QMessageBox::critical(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("请先选择算法!"));
         return;
     }
+
+    if (m_vecInputValueReference.size() <= 0 || m_vecOutputValueReference.size() <= 0)
+    {
+        QMessageBox::critical(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("输入输出端口不正常,无法计算!"));
+        return;
+    }
+
     m_iCalculateCount++;
    
     //传入输出；
@@ -416,7 +423,7 @@ void operstionWidget::slot_btnCalculate()
     }
 
     // 传给算法;
-  //  std::string exe_config_paths = "D:\\CS\\Anntena_System.fmu";//m_fileInfo.filePath().toStdString();
+    //std::string exe_config_paths = "D:\\CS\\atspaceMicroTimer.fmu";//m_fileInfo.filePath().toStdString();
     std::string exe_config_paths = m_fileInfo.absoluteFilePath().toStdString();
     const std::string fmu_path = string_To_UTF8(exe_config_paths);
     fmi2::fmu fmu(fmu_path);
