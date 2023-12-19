@@ -5,6 +5,7 @@
 #include <QFileInfo>
 #include <QFile>
 #include <QSet>
+#include <QDomDocument>
 
 #include "fmi4cpp/fmi4cpp.hpp"
 
@@ -27,6 +28,12 @@ public:
     bool deleteFile(const QString strFilePath);
     bool deleteDir(const QString strDirPath);
     bool readXML(const QString strXmlPath);
+
+    bool create_xml_configuration(QFile& file, QDomDocument& doc, QDomElement& root);
+
+    void load_algorithm_conguration(const QString filePath);
+    void load_data_conguration(const QVector<QString> &vecInputPort, std::vector<fmi2ValueReference> &vecInputValueReference,const QVector<double>& vecInputValue, const QVector<QString>& vecOutputPort, std::vector<fmi2ValueReference>& vecOutputValueReference );
+private:
 
 private slots:
     void slot_btnChooseFile();

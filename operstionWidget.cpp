@@ -1,7 +1,7 @@
 ﻿#include <QFileDialog>
 #include <QDebug>
 #include <fstream>
-#include <QDomDocument>
+
 #include <qmessagebox.h>
 #include "QtGui/private/qzipreader_p.h"
 
@@ -13,6 +13,8 @@
 
 using namespace fmi4cpp;
 const double stepSize = 1;
+
+
 
 QMap<int,QString> operstionWidget::m_mapAlgorithmName;// 算法名称；
 QMap<int,QVector<QString>> operstionWidget::m_mapOutputPort={}; //输出端口;
@@ -46,7 +48,7 @@ operstionWidget::operstionWidget(const int num,QWidget *parent) :m_iAlgorithmNum
     connect(ui->tableWidget_input,&QTableWidget::customContextMenuRequested,this,&operstionWidget::slot_tableWidgetCustomContextMenuRequested);
 
 
-    connect(ui->tableWidget_output, SIGNAL(cellChanged(int ,int )), this, SLOT(slot_tableWigdetCheckedChanged(int , int )));
+   // connect(ui->tableWidget_output, SIGNAL(cellChanged(int ,int )), this, SLOT(slot_tableWigdetCheckedChanged(int , int )));
     connect(ui->btn_calculate,&QPushButton::clicked,this,&operstionWidget::slot_btnCalculate);
     connect(ui->btn_clear,&QPushButton::clicked,this,&operstionWidget::slot_btnClear);
     connect(ui->btn_curve_show,&QPushButton::clicked,this,&operstionWidget::slot_btnCurveShow);
@@ -298,25 +300,196 @@ bool operstionWidget::readXML(const QString strXmlPath)
 
         }
 
-        m_setOutputIndex.clear();
-        for(int i=0;i<ui->tableWidget_output->columnCount();i++)
-        {
-            auto pItem = ui->tableWidget_output->item(0,i);
-            if(pItem)
-            {
-                if(pItem->checkState() == Qt::Checked)
-                {
-                    m_setOutputIndex.insert(i);
-                }
-                else
-                {
-                    m_setOutputIndex.remove(i);
-                }
-            }
-
-        }
+       
         return 1;
 }
+
+bool operstionWidget::create_xml_configuration(QFile& file, QDomDocument& doc, QDomElement& root)
+{
+
+    if (m_vecInputPort.size() <= 0 || (!m_mapOutputPort.contains(m_iAlgorithmNum)))
+    {
+       qDebug() << m_iAlgorithmNum << "此算法不保存配置！";
+        return false;
+    }
+       
+    const auto& vecOutputData = m_mapOutputPort[m_iAlgorithmNum];
+    if (vecOutputData.size() <= 0)
+    {
+        qDebug() << m_iAlgorithmNum << "此算法不保存配置！";
+        return false;
+    }
+       
+
+    //添加第一个book元素及其子元素
+    QDomElement AlgorithmNum = doc.createElement(tr("AlgorithmNum"));
+    QDomAttr num = doc.createAttribute(tr("num"));
+    QDomAttr filePath = doc.createAttribute(tr("filePath"));
+
+    //int iAlgorithmNum = 1;
+    num.setValue(QString::number(m_iAlgorithmNum));
+    filePath.setValue(m_fileInfo.filePath());
+
+    AlgorithmNum.setAttributeNode(filePath);
+    AlgorithmNum.setAttributeNode(num);
+   
+
+    // 输入端口相关数据
+ 
+    for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
+    {
+        QDomElement elment_input = doc.createElement(tr("input"));
+
+        // 属性;
+        QDomAttr name = doc.createAttribute(tr("name"));
+        QDomAttr valueReference = doc.createAttribute(tr("valueReference")); 
+        QDomAttr value = doc.createAttribute(tr("value")); 
+
+        name.setValue(m_vecInputPort.at(i));
+        valueReference.setValue(QString::number(m_vecInputValueReference.at(i)));
+        auto pItem = ui->tableWidget_input->item(1, i);
+        if (pItem)
+        {
+            value.setValue(pItem->text());
+        }
+        else
+        {
+            value.setValue(QString::number(0.0));
+        }
+            
+        elment_input.setAttributeNode(value);
+        elment_input.setAttributeNode(valueReference);
+        elment_input.setAttributeNode(name);
+            
+
+        AlgorithmNum.appendChild(elment_input);
+        
+}
+    //else
+    //{
+    //    //QMessageBox::critical(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("!"));
+    //    qDebug() << m_iAlgorithmNum << " 输入端口数量为0，此算法不保存配置！";
+    //    return false;
+    //}
+    
+    // 输出端口相关数据;
+  //  const auto & vecOutputData = m_mapOutputPort[m_iAlgorithmNum];
+   
+    for (int i = 0; i < vecOutputData.size(); i++)
+    {
+        QDomElement elment_output = doc.createElement(tr("output"));
+
+        // 属性;
+        QDomAttr name = doc.createAttribute(tr("name"));
+        QDomAttr valueReference = doc.createAttribute(tr("valueReference"));
+
+
+        name.setValue(vecOutputData.at(i));
+        valueReference.setValue(QString::number(m_vecOutputValueReference.at(i)));
+
+        elment_output.setAttributeNode(valueReference);
+        elment_output.setAttributeNode(name);
+             
+
+        AlgorithmNum.appendChild(elment_output);
+    }
+     
+     //else
+     //{
+     //    qDebug() << m_iAlgorithmNum << " 输出端口数量为0，此算法不保存配置！";
+     //    return false;
+     //}
+    
+     root.appendChild(AlgorithmNum);
+
+
+
+  /*  QDomElement title = doc.createElement(tr("书名"));
+    QDomElement author = doc.createElement(tr("作者"));
+    QDomText text;
+   
+    AlgorithmNum.setAttributeNode(num);
+    AlgorithmNum.setAttributeNode(filePath);
+    text = doc.createTextNode("Qt");
+    title.appendChild(text);
+    text = doc.createTextNode("shiming");
+    author.appendChild(text);*/
+    //AlgorithmNum.appendChild(title);
+    //AlgorithmNum.appendChild(author);
+   
+
+    //添加第二个book元素及其子元素
+    //AlgorithmNum = doc.createElement(tr("图书"));
+    //num = doc.createAttribute(tr("编号"));
+    //title = doc.createElement(tr("书名"));
+    //author = doc.createElement(tr("作者"));
+    //num.setValue("2");
+    //AlgorithmNum.setAttributeNode(num);
+    //text = doc.createTextNode("Linux");
+    //title.appendChild(text);
+    //text = doc.createTextNode("LiMing");
+    //author.appendChild(text);
+    //AlgorithmNum.appendChild(title);
+    //AlgorithmNum.appendChild(author);
+   // root.appendChild(AlgorithmNum);
+
+    //QTextStream out(&file);
+    //doc.save(out, 4);
+    //file.close();
+
+    return true;
+}
+
+void operstionWidget::load_algorithm_conguration(const QString filePath)
+{
+    m_fileInfo = filePath;
+    if (m_fileInfo.fileName().isEmpty())
+    {
+        return;
+    }
+    ui->label_algorithm->setText(m_fileInfo.fileName());
+    m_mapAlgorithmName[m_iAlgorithmNum] = m_fileInfo.fileName();
+   
+}
+
+void operstionWidget::load_data_conguration(const QVector<QString>& vecInputPort, std::vector<fmi2ValueReference>& vecInputValueReference, const QVector<double>& vecInputValue, const QVector<QString>& vecOutputPort, std::vector<fmi2ValueReference>& vecOutputValueReference)
+{
+    m_vecInputPort = vecInputPort;
+    m_vecInputValueReference = vecInputValueReference;
+    m_mapOutputPort[m_iAlgorithmNum] = vecOutputPort;
+    m_vecOutputValueReference = vecOutputValueReference;
+
+    // 界面显示;
+    ui->tableWidget_input->clearContents();
+    ui->tableWidget_input->setColumnCount(m_vecInputPort.size());
+
+    for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
+    {
+        QTableWidgetItem* pItemPort = new QTableWidgetItem(m_vecInputPort[i]);
+        ui->tableWidget_input->setItem(0, i, pItemPort);
+
+        QTableWidgetItem* pItemValue = new QTableWidgetItem(QString::number(vecInputValue.at(i)));
+        ui->tableWidget_input->setItem(1, i, pItemValue);
+
+    }
+
+    ui->tableWidget_output->clearContents();
+    ui->tableWidget_output->setColumnCount(m_mapOutputPort[m_iAlgorithmNum].size());
+
+    for (int i = 0; i < ui->tableWidget_output->columnCount(); i++)
+    {
+        QTableWidgetItem* pItemPort = new QTableWidgetItem(m_mapOutputPort[m_iAlgorithmNum].at(i));
+        pItemPort->setCheckState(Qt::Unchecked);
+        ui->tableWidget_output->setItem(0, i, pItemPort);
+
+        QTableWidgetItem* pItemValue = new QTableWidgetItem("");
+        ui->tableWidget_output->setItem(1, i, pItemValue);
+
+    }
+
+}
+
+
 
 void operstionWidget::slot_btnChooseFile()
 {
@@ -356,18 +529,18 @@ void operstionWidget::slot_btnChooseFile()
 
 void operstionWidget::slot_tableWigdetCheckedChanged(int row, int col)
 {
-    qDebug()<<"slot_tableWigdetCheckedChanged"<<row<<col;
-    auto pItem = ui->tableWidget_output->item(row,col);
-    if(pItem==nullptr)
-        return;
-    if(pItem->checkState() == Qt::Checked)
-    {
-        m_setOutputIndex.insert(col);
-    }
-    else
-    {
-        m_setOutputIndex.remove(col);
-    }
+    //qDebug()<<"slot_tableWigdetCheckedChanged"<<row<<col;
+    //auto pItem = ui->tableWidget_output->item(row,col);
+    //if(pItem==nullptr)
+    //    return;
+    //if(pItem->checkState() == Qt::Checked)
+    //{
+    //    m_setOutputIndex.insert(col);
+    //}
+    //else
+    //{
+    //    m_setOutputIndex.remove(col);
+    //}
 }
 
 void operstionWidget::slot_btn_clear_input()
@@ -505,6 +678,23 @@ void operstionWidget::slot_btnClear()
 
 void operstionWidget::slot_btnCurveShow()
 {
+    m_setOutputIndex.clear();
+    for (int i = 0; i < ui->tableWidget_output->columnCount(); i++)
+    {
+        auto pItem = ui->tableWidget_output->item(0, i);
+        if (pItem)
+        {
+            if (pItem->checkState() == Qt::Checked)
+            {
+                m_setOutputIndex.insert(i);
+            }
+            else
+            {
+                m_setOutputIndex.remove(i);
+            }
+        }
+
+    }
     if(m_setOutputIndex.isEmpty())
     {
         QMessageBox::critical(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("请先勾选要显示的输出位!"));

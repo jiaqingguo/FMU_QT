@@ -17,6 +17,13 @@ public:
 
 private slots:
     void  slot_widgetCustomContextMenuRequested(const QPoint &pos);
+
+    void create_xml_configuration();
+
+    bool load_xml_configuration();
+
+    void initialize_configuration();
+
 private:
     Ui::Widget *ui;
     int m_iAlgorithmNum=0;

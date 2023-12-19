@@ -9,6 +9,7 @@ curveShowDialog::curveShowDialog(QWidget *parent) :
     ui(new Ui::curveShowDialog)
 {
     ui->setupUi(this);
+    setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
     QGridLayout *layout = new QGridLayout(this);
     layout->setMargin(0);
     setLayout(layout);
@@ -42,7 +43,7 @@ curveShowDialog::~curveShowDialog()
     delete ui;
 }
 
-void curveShowDialog::setCurveSHowData(const int paiNUm,const QMap<int, QVector<double> > mapData)
+void curveShowDialog::setCurveSHowData(const int paiNum,const QMap<int, QVector<double> > mapData)
 {
 
     // 确定x轴 y轴的最大值最小值;
@@ -50,7 +51,7 @@ void curveShowDialog::setCurveSHowData(const int paiNUm,const QMap<int, QVector<
     double min = 0;
     double max = 0;
 
-    m_pAxisX->setRange(0,paiNUm>2? paiNUm:2);
+    m_pAxisX->setRange(0, paiNum >2? paiNum :2);
     for(  auto itor = mapData.begin();itor!=mapData.end();itor++)
     {
         //创建线
@@ -62,16 +63,17 @@ void curveShowDialog::setCurveSHowData(const int paiNUm,const QMap<int, QVector<
        ser->setPointsVisible(true);
        int x = 0;
        // 线条添加数据;
-       for(int i =0;i< paiNUm;i++)
+       for(int i =0;i< paiNum;i++)
        {
            x=i + 1;
+           double value = itor.value().at(i);
            ser->append(x,itor.value().at(i));
 
-           if (max > itor.value().at(i))
+           if (max < itor.value().at(i))
            {
                max = itor.value().at(i);
            }
-           if (min < itor.value().at(i))
+           if (min > itor.value().at(i))
            {
                min = itor.value().at(i);
            }
