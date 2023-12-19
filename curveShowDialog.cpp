@@ -29,7 +29,7 @@ curveShowDialog::curveShowDialog(QWidget *parent) :
     m_pAxisX->setTitleText(QString::fromLocal8Bit("拍数"));
     m_pAxisX->setMinorTickCount(0);  // 禁用次要刻度
     m_pAxisX->setTickType(QtCharts::QValueAxis::TickType::TicksDynamic);  // 动态刻度
-    m_pAxisX->setTickInterval(2);  // 设置刻度间隔为2
+    m_pAxisX->setTickInterval(1);  // 设置刻度间隔为1
     m_pAxisX->setRange(0, 10);
 
     m_pAxisY->setTitleText(QString::fromLocal8Bit("输出值"));
@@ -50,7 +50,7 @@ void curveShowDialog::setCurveSHowData(const int paiNUm,const QMap<int, QVector<
     double min = 0;
     double max = 0;
 
-    m_pAxisX->setRange(0,paiNUm>10? paiNUm:10);
+    m_pAxisX->setRange(0,paiNUm>2? paiNUm:2);
     for(  auto itor = mapData.begin();itor!=mapData.end();itor++)
     {
         //创建线
@@ -59,7 +59,7 @@ void curveShowDialog::setCurveSHowData(const int paiNUm,const QMap<int, QVector<
        //设置名字
        QString strName ="["+QString::number(itor.key())+"]";
        ser->setName(strName);
-
+       ser->setPointsVisible(true);
        int x = 0;
        // 线条添加数据;
        for(int i =0;i< paiNUm;i++)

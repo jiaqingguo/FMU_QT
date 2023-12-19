@@ -30,18 +30,21 @@ operstionWidget::operstionWidget(const int num,QWidget *parent) :m_iAlgorithmNum
     ui->tableWidget_input->setVerticalHeaderLabels(QStringList() << QStringLiteral("端口 ") << QStringLiteral("数值 "));
     ui->tableWidget_input->horizontalHeader()->setHidden(true);
     ui->tableWidget_input->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->tableWidget_input->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);//自动设置列宽
     //ui->tableWidget_input->setHorizontalHeaderLabels(QStringList() << "" << "");
        //设置表格数据区内的所有单元格都不允许编辑
        //TableWidget.setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     ui->tableWidget_output->setRowCount(2);
     ui->tableWidget_output->setVerticalHeaderLabels(QStringList() << QStringLiteral("端口 ") << QStringLiteral("数值 "));
-    ui->tableWidget_output->horizontalHeader()->setHidden(true);
-
+    ui->tableWidget_output->horizontalHeader()->setHidden(true);   // 隐藏表头
+    ui->tableWidget_output->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);//自动设置列宽
+    ui->tableWidget_output->setEditTriggers(QAbstractItemView::NoEditTriggers); // 设置不可编辑;
 
     connect(ui->btn_choose,&QPushButton::clicked,this,&operstionWidget::slot_btnChooseFile);
     connect(ui->btn_clear_input,&QPushButton::clicked,this,&operstionWidget::slot_btn_clear_input);
     connect(ui->tableWidget_input,&QTableWidget::customContextMenuRequested,this,&operstionWidget::slot_tableWidgetCustomContextMenuRequested);
+
 
     connect(ui->tableWidget_output, SIGNAL(cellChanged(int ,int )), this, SLOT(slot_tableWigdetCheckedChanged(int , int )));
     connect(ui->btn_calculate,&QPushButton::clicked,this,&operstionWidget::slot_btnCalculate);
@@ -240,6 +243,11 @@ bool operstionWidget::readXML(const QString strXmlPath)
 
         m_vecInputValueReference.clear();
         m_vecOutputValueReference.clear();
+        m_vecInputPort.clear();
+        if (m_mapOutputPort.contains(m_iAlgorithmNum))
+        {
+            m_mapOutputPort[m_iAlgorithmNum].clear();
+        }
 
         int listSize = nodeList.size();
         for(int i = 0; i < listSize; ++i)
@@ -263,6 +271,7 @@ bool operstionWidget::readXML(const QString strXmlPath)
         }
 
         // 界面显示;
+        ui->tableWidget_input->clearContents();
         ui->tableWidget_input->setColumnCount(m_vecInputPort.size());
 
         for(int i=0;i<ui->tableWidget_input->columnCount();i++)
@@ -275,6 +284,7 @@ bool operstionWidget::readXML(const QString strXmlPath)
 
         }
 
+        ui->tableWidget_output->clearContents();
         ui->tableWidget_output->setColumnCount(m_mapOutputPort[m_iAlgorithmNum].size());
 
         for(int i=0;i<ui->tableWidget_output->columnCount();i++)
@@ -312,7 +322,7 @@ void operstionWidget::slot_btnChooseFile()
 {
 
     QString file_full, file_name, current_Path, file_path, file_suffix, complete_suffix, file_baseName, file_completeBaseName ;
-    QFileInfo fileinfo; // <<------
+    QFileInfo fileinfo; 
     m_fileInfo =QFileDialog::getOpenFileName(this, "Open File", "QCoreApplication::applicationFilePath()",
                                             "AllFile (*.fmu);;");
     
@@ -497,7 +507,7 @@ void operstionWidget::slot_btnCurveShow()
 {
     if(m_setOutputIndex.isEmpty())
     {
-        QMessageBox::critical(this, "提示","请先勾选要显示的输出位！");
+        QMessageBox::critical(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("请先勾选要显示的输出位!"));
         return;
     }
     const auto &mapData=m_mapAllOutputData[m_iAlgorithmNum];
