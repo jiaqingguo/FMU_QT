@@ -6,6 +6,8 @@
 #include <QChartView>
 #include <QtCharts/QValueAxis>
 
+#include "ChartView.h"
+
 namespace Ui {
 class curveShowDialog;
 }
@@ -22,7 +24,7 @@ public:
 private:
     Ui::curveShowDialog *ui;
     QtCharts::QChart *m_pChart;
-    QtCharts::QChartView *m_pChartView;
+    ChartView *m_pChartView;
     QtCharts::QValueAxis *m_pAxisX;
     QtCharts::QValueAxis *m_pAxisY;
 };

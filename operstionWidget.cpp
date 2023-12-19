@@ -322,7 +322,7 @@ bool operstionWidget::create_xml_configuration(QFile& file, QDomDocument& doc, Q
        
 
     //添加第一个book元素及其子元素
-    QDomElement AlgorithmNum = doc.createElement(tr("AlgorithmNum"));
+    QDomElement AlgorithmNum = doc.createElement(tr("Algorithm"));
     QDomAttr num = doc.createAttribute(tr("num"));
     QDomAttr filePath = doc.createAttribute(tr("filePath"));
 
