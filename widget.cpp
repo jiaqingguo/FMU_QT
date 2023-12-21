@@ -18,7 +18,8 @@ Widget::Widget(QWidget *parent)
 
      setWindowTitle(QString::fromLocal8Bit("FMU算法验证工具"));
      setContextMenuPolicy(Qt::CustomContextMenu);
-
+     m_calculate_control_dialog = new calculate_control_dialog(this);
+     connect(m_calculate_control_dialog, &calculate_control_dialog::signal_calculate_control, this, &Widget::slot_recv_calculate_control);
     // 初始化界面;
     ui->tabWidget->removeTab(1);
     ui->tabWidget->removeTab(0);
@@ -32,7 +33,7 @@ Widget::Widget(QWidget *parent)
     pData->iAlgorithmNum = m_iAlgorithmNum;*/
    // ui->tabWidget->setUserData(tabIndex, pData);
     connect(this,&Widget::customContextMenuRequested,this,&Widget::slot_widgetCustomContextMenuRequested);
-
+    connect(ui->btn_calculate_control, &QPushButton::clicked, this, &Widget::slot_btn_calculate_control);
 }
 
 Widget::~Widget()
@@ -346,6 +347,37 @@ void Widget::slot_update_prot_data(QMap<int, QMap<int, double>> mapNewData)
 
     }
 
+}
+
+void Widget::slot_btn_calculate_control()
+{
+    m_calculate_control_dialog->exec();
+}
+
+void Widget::slot_recv_calculate_control(int flag, int count/* = 0*/)
+{
+    if (flag == 1)
+    {
+        for (int i = 0; i < m_iThreadCount; i++)
+        {
+            int count = ui->tabWidget->count();
+            for (int i = 0; i < count; i++)
+            {
+                QWidget* pWidget = ui->tabWidget->widget(i);
+                operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
+                pOperstionWidget->slot_btnCalculate();
+
+
+       
+            }
+            qDebug() << "slot_recv_calculate_control()" << i;
+        }
+        
+    }
+    else
+    {
+       // m_iThreadCount = 0;
+    }
 }
 
 void Widget::slot_widgetCustomContextMenuRequested(const QPoint &pos)

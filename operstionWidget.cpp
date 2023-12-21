@@ -60,8 +60,8 @@ operstionWidget::operstionWidget(const int num,QWidget *parent) :m_iAlgorithmNum
 operstionWidget::~operstionWidget()
 {
     delete ui;
-    if (m_thread.joinable())
-        m_thread.join();
+   /* if (m_thread.joinable())
+        m_thread.join();*/
     qDebug()<<"~operstionWidget()";
     m_mapRelevance.remove(m_iAlgorithmNum);
     m_mapAlgorithmName.remove(m_iAlgorithmNum);
@@ -186,6 +186,11 @@ bool operstionWidget::deleteFile(const QString strFilePath)
     return  file.remove();
 }
 
+//bool operstionWidget::deleteDir(const QString strDirPath)
+//{
+//    return false;
+//}
+
 bool operstionWidget::deleteDir(const QString strDirPath)
 {
     if (strDirPath.isEmpty())
@@ -309,8 +314,8 @@ bool operstionWidget::readXML(const QString strXmlPath)
 
         }*/
         std::thread thread_(&operstionWidget::load_tableWidget_show, this);
-        thread_.join();
-       
+      //  thread_.join();
+        thread_.detach();
         return 1;
 }
 
@@ -514,8 +519,8 @@ void operstionWidget::load_data_conguration(const QVector<QString>& vecInputPort
     //}
 
     std::thread thread_(&operstionWidget::load_tableWidget_show, this);
-    thread_.join();
-
+    //thread_.join();
+    thread_.detach();
 }
 
 void operstionWidget::load_relevance_conguration(const QMap<int, QMap<int, int>>& mapRelevance)
@@ -584,6 +589,8 @@ void operstionWidget::load_tableWidget_show()
         ui->tableWidget_output->setItem(1, i, pItemValue);
 
     }
+
+   
 }
 
 void operstionWidget::use_fmu_caculate()
@@ -651,7 +658,7 @@ void operstionWidget::use_fmu_caculate()
 
     // 接受算法输出进行显示;
     m_mapAllOutputData[m_iAlgorithmNum][m_iCalculateCount] = ref;
-
+    qDebug() << "end----use_fmu_caculate()";
  /*   ui->comboBox_countShow->addItem(QString::number(m_iCalculateCount));
     int index = m_iCalculateCount - 1;
     ui->comboBox_countShow->setCurrentIndex(index);*/

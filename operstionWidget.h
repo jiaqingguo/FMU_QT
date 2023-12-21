@@ -54,12 +54,14 @@ signals:
    // void signal_port_relevance(int srcAlgorithNum, int srcOutIndex, int dstSrcAlgorithNum, int dstInputIndex);
 
     void signal_update_port_data(QMap<int, QMap<int, double>> mapNewData);
+public slots:
+    void slot_btnCalculate();
 private slots:
     void slot_btnChooseFile();
     void slot_tableWigdetCheckedChanged(int row, int col);
     void slot_btn_clear_input();
     void slot_tableWidgetCustomContextMenuRequested(const QPoint &pos);
-    void slot_btnCalculate();
+   
     void slot_btnClear();
     void slot_btnCurveShow();
 
