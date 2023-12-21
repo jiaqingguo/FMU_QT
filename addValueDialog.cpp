@@ -100,7 +100,7 @@ void addValueDialog::getRelevanceData(int& algorithNum, int& outputIndex, QStrin
 {
     algorithNum = ui->comboBox_algorithmName->currentData(Qt::UserRole).toInt();
     outputIndex = ui->comboBox_portName->currentIndex();
-    value= ui->label_value->text().toDouble();
+    value= ui->label_value->text();
 }
 
 void addValueDialog::slot_algorithmNameChanged(int index)

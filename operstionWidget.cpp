@@ -345,7 +345,7 @@ bool operstionWidget::create_xml_configuration(QFile& file, QDomDocument& doc, Q
    
 
     // 输入端口相关数据
- 
+    const auto& mapRelevance = m_mapRelevance[m_iAlgorithmNum];
     for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
     {
         QDomElement elment_input = doc.createElement(tr("input"));
@@ -370,11 +370,24 @@ bool operstionWidget::create_xml_configuration(QFile& file, QDomDocument& doc, Q
         elment_input.setAttributeNode(value);
         elment_input.setAttributeNode(valueReference);
         elment_input.setAttributeNode(name);
-            
+        if (mapRelevance.contains(i))
+        {
+            auto mapData = mapRelevance[i];
+            QDomAttr algorithmNum = doc.createAttribute(tr("algorithmNum"));
+            QDomAttr outputIndex = doc.createAttribute(tr("outputIndex"));
+            algorithmNum.setValue(QString::number(mapData.firstKey()));
+            outputIndex.setValue(QString::number(mapData[mapData.firstKey()]));
+            elment_input.setAttributeNode(algorithmNum);
+            elment_input.setAttributeNode(outputIndex);
+        }
 
         AlgorithmNum.appendChild(elment_input);
         
-}
+    }
+    if (mapRelevance.size() <= 0)
+    {
+        m_mapRelevance.remove(m_iAlgorithmNum);
+    }
     //else
     //{
     //    //QMessageBox::critical(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("!"));
@@ -385,6 +398,8 @@ bool operstionWidget::create_xml_configuration(QFile& file, QDomDocument& doc, Q
     // 输出端口相关数据;
   //  const auto & vecOutputData = m_mapOutputPort[m_iAlgorithmNum];
    
+    
+    
     for (int i = 0; i < vecOutputData.size(); i++)
     {
         QDomElement elment_output = doc.createElement(tr("output"));
@@ -399,8 +414,7 @@ bool operstionWidget::create_xml_configuration(QFile& file, QDomDocument& doc, Q
 
         elment_output.setAttributeNode(valueReference);
         elment_output.setAttributeNode(name);
-             
-
+            
         AlgorithmNum.appendChild(elment_output);
     }
      
@@ -502,6 +516,11 @@ void operstionWidget::load_data_conguration(const QVector<QString>& vecInputPort
     std::thread thread_(&operstionWidget::load_tableWidget_show, this);
     thread_.join();
 
+}
+
+void operstionWidget::load_relevance_conguration(const QMap<int, QMap<int, int>>& mapRelevance)
+{
+    m_mapRelevance.insert(m_iAlgorithmNum, mapRelevance);
 }
 
 int operstionWidget::get_algorithm_num()
@@ -802,7 +821,15 @@ void operstionWidget::slot_tableWidgetCustomContextMenuRequested(const QPoint &p
        int sendAlgorithmNum; 
        int sendOutputIndex;
        dialog.getRelevanceData(sendAlgorithmNum, sendOutputIndex, value);
-       pItem->setText(value);
+       if (value.isEmpty())
+       {
+           pItem->setText(QString::number(0.0));
+       }
+       else
+       {
+           pItem->setText(value);
+       }
+      
        if (sendAlgorithmNum != m_iAlgorithmNum)
        {
            int col = pItem->column();
@@ -816,8 +843,6 @@ void operstionWidget::slot_tableWidgetCustomContextMenuRequested(const QPoint &p
        {
            // 自己的端口是否关联;
        }
-
-       
 
     }
 }
@@ -994,4 +1019,16 @@ void operstionWidget::slot_comboxPaiNumChanged(int index)
 void operstionWidget::slot_tableWidgetCellEntered(int row, int column)
 {
     qDebug() << "slot_tableWidgetCellEntered " << row << column;
+
+    // 解除关联端口;
+    auto pItem = ui->tableWidget_input->item(row, column);
+    if (pItem)
+    {
+        //pItem->
+    }
+
+    if (m_mapRelevance.contains(m_iAlgorithmNum))
+    {
+        m_mapRelevance[m_iAlgorithmNum].remove(column);
+    }
 }

@@ -213,6 +213,8 @@ bool Widget::load_xml_configuration()
     //返回根节点的第一个子节点
     QDomNode node_AlgorithmNum = rootElem.firstChild();
 
+    
+    QMap<int, QMap<int, int>> mapRelevance;
     while (!node_AlgorithmNum.isNull())
     {
         //如果子节点是元素
@@ -239,6 +241,8 @@ bool Widget::load_xml_configuration()
             QVector<QString> vecOutputPort;   // 输出端口;
             QVector<double> vecInputValue;  // 输入值;
 
+            int inputPortIndex = 0;
+
             QDomNodeList list = e_AlgorithmNum.childNodes();
             for (int i = 0; i < list.count(); i++)
             {
@@ -257,6 +261,15 @@ bool Widget::load_xml_configuration()
                         vecInputPort.append(strName);
                         vecInputValueReference.push_back(strValueReference.toInt());
                         vecInputValue.append(value);
+
+                        // 关联算法端口读取处理;
+                        if (element_port.hasAttribute("algorithmNum"))
+                        {
+                            int sendAlgorithNum = element_port.attribute("algorithmNum").toInt();
+                            int sendOutputPortIndex = element_port.attribute("outputIndex").toInt();
+                            mapRelevance[inputPortIndex].insert(sendAlgorithNum, sendOutputPortIndex);
+                        }
+                        inputPortIndex++;
                     }
                     else if (strType == "output")
                     {
@@ -267,9 +280,11 @@ bool Widget::load_xml_configuration()
             }
 
             pWidget->load_data_conguration(vecInputPort, vecInputValueReference, vecInputValue, vecOutputPort, vecOutputValueReference);
-
-
-
+            if (mapRelevance.size() > 0)
+            {
+                pWidget->load_relevance_conguration(mapRelevance);
+                mapRelevance.clear();
+            }
         }
 
         node_AlgorithmNum = node_AlgorithmNum.nextSibling();
