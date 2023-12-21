@@ -96,6 +96,13 @@ QString addValueDialog::getInputValue()
     return ui->label_value->text();
 }
 
+void addValueDialog::getRelevanceData(int& algorithNum, int& outputIndex, QString& value)
+{
+    algorithNum = ui->comboBox_algorithmName->currentData(Qt::UserRole).toInt();
+    outputIndex = ui->comboBox_portName->currentIndex();
+    value= ui->label_value->text().toDouble();
+}
+
 void addValueDialog::slot_algorithmNameChanged(int index)
 {
     if (index < 0)

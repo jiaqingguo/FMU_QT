@@ -64,13 +64,13 @@ void curveShowDialog::setCurveSHowData(const int paiNum,const QMap<int, QVector<
     // 确定x轴 y轴的最大值最小值;
 
     double min = 0;
-    double max = 0;
+    double max = 10;
 
     m_pAxisX->setRange(0, paiNum >2? paiNum :2);
     for(  auto itor = mapData.begin();itor!=mapData.end();itor++)
     {
         //创建线
-       QtCharts::QLineSeries *ser = new QtCharts::QLineSeries;
+       QtCharts::QSplineSeries*ser = new QtCharts::QSplineSeries;
 
        //设置名字
        QString strName ="["+QString::number(itor.key())+"]";

@@ -19,6 +19,7 @@ public:
     void init();
 
     QString getInputValue();
+    void getRelevanceData(int& algorithNum, int& outputIndex, QString& value);
     void setAlgorithmName(const QMap<int,QString> &mapAlgorithmName);
     void setOutputPortName(const QMap<int,QVector<QString>> &mapOutputPort);
     void setAllOutputData(const std::map<int,std::map<int,std::vector<double>>> & mapAllOutputData);

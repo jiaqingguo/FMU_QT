@@ -15,7 +15,7 @@ using namespace fmi4cpp;
 const double stepSize = 1;
 
 
-
+QMap<int, QMap<int, QMap<int, int>>> operstionWidget::m_mapRelevance = { };
 QMap<int,QString> operstionWidget::m_mapAlgorithmName;// 算法名称；
 QMap<int,QVector<QString>> operstionWidget::m_mapOutputPort={}; //输出端口;
 std::map<int,std::map<int,std::vector<double>>> operstionWidget::m_mapAllOutputData={};
@@ -32,7 +32,8 @@ operstionWidget::operstionWidget(const int num,QWidget *parent) :m_iAlgorithmNum
     ui->tableWidget_input->setVerticalHeaderLabels(QStringList() << QStringLiteral("端口 ") << QStringLiteral("数值 "));
     ui->tableWidget_input->horizontalHeader()->setHidden(true);
     ui->tableWidget_input->setContextMenuPolicy(Qt::CustomContextMenu);
-    ui->tableWidget_input->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);//自动设置列宽
+   // ui->tableWidget_input->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);//自动设置列宽
+   // ui->tableWidget_input->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     //ui->tableWidget_input->setHorizontalHeaderLabels(QStringList() << "" << "");
        //设置表格数据区内的所有单元格都不允许编辑
        //TableWidget.setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -46,7 +47,8 @@ operstionWidget::operstionWidget(const int num,QWidget *parent) :m_iAlgorithmNum
     connect(ui->btn_choose,&QPushButton::clicked,this,&operstionWidget::slot_btnChooseFile);
     connect(ui->btn_clear_input,&QPushButton::clicked,this,&operstionWidget::slot_btn_clear_input);
     connect(ui->tableWidget_input,&QTableWidget::customContextMenuRequested,this,&operstionWidget::slot_tableWidgetCustomContextMenuRequested);
-
+    connect(ui->tableWidget_input, &QTableWidget::cellDoubleClicked, this, &operstionWidget::slot_tableWidgetCellEntered);
+    
 
    // connect(ui->tableWidget_output, SIGNAL(cellChanged(int ,int )), this, SLOT(slot_tableWigdetCheckedChanged(int , int )));
     connect(ui->btn_calculate,&QPushButton::clicked,this,&operstionWidget::slot_btnCalculate);
@@ -58,7 +60,10 @@ operstionWidget::operstionWidget(const int num,QWidget *parent) :m_iAlgorithmNum
 operstionWidget::~operstionWidget()
 {
     delete ui;
+    if (m_thread.joinable())
+        m_thread.join();
     qDebug()<<"~operstionWidget()";
+    m_mapRelevance.remove(m_iAlgorithmNum);
     m_mapAlgorithmName.remove(m_iAlgorithmNum);
     m_mapOutputPort.remove(m_iAlgorithmNum);
     m_mapAllOutputData.erase(m_iAlgorithmNum);
@@ -271,25 +276,29 @@ bool operstionWidget::readXML(const QString strXmlPath)
             }
 
         }
-
+        // QTableWidgetItem *pItemValue = new QTableWidgetItem("");
         // 界面显示;
-        ui->tableWidget_input->clearContents();
-        ui->tableWidget_input->setColumnCount(m_vecInputPort.size());
 
+        //if (!m_thread.joinable())
+           // m_thread = std::thread(&operstionWidget::load_tableWidget_show, this);
+       
+       ui->tableWidget_input->clearContents();
+        ui->tableWidget_input->setColumnCount(m_vecInputPort.size());
+       /* QTableWidgetItem* pItem;
         for(int i=0;i<ui->tableWidget_input->columnCount();i++)
         {
-            QTableWidgetItem *pItemPort = new QTableWidgetItem(m_vecInputPort[i]);
-            ui->tableWidget_input->setItem(0,i,pItemPort);
+            pItem = new QTableWidgetItem(m_vecInputPort[i]);
+            ui->tableWidget_input->setItem(0,i, pItem);
 
-            QTableWidgetItem *pItemValue = new QTableWidgetItem("");
-            ui->tableWidget_input->setItem(1,i,pItemValue);
-
-        }
+          
+            pItem = new QTableWidgetItem("");
+            ui->tableWidget_input->setItem(1,i, pItem);
+        }*/
 
         ui->tableWidget_output->clearContents();
         ui->tableWidget_output->setColumnCount(m_mapOutputPort[m_iAlgorithmNum].size());
 
-        for(int i=0;i<ui->tableWidget_output->columnCount();i++)
+      /*  for(int i=0;i<ui->tableWidget_output->columnCount();i++)
         {
             QTableWidgetItem *pItemPort = new QTableWidgetItem(m_mapOutputPort[m_iAlgorithmNum].at(i));
             pItemPort->setCheckState(Qt::Unchecked);
@@ -298,8 +307,9 @@ bool operstionWidget::readXML(const QString strXmlPath)
             QTableWidgetItem *pItemValue = new QTableWidgetItem("");
             ui->tableWidget_output->setItem(1,i,pItemValue);
 
-        }
-
+        }*/
+        std::thread thread_(&operstionWidget::load_tableWidget_show, this);
+        thread_.join();
        
         return 1;
 }
@@ -459,22 +469,91 @@ void operstionWidget::load_data_conguration(const QVector<QString>& vecInputPort
     m_mapOutputPort[m_iAlgorithmNum] = vecOutputPort;
     m_vecOutputValueReference = vecOutputValueReference;
 
+    m_vecInputValue = vecInputValue;
+
     // 界面显示;
     ui->tableWidget_input->clearContents();
     ui->tableWidget_input->setColumnCount(m_vecInputPort.size());
 
-    for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
-    {
-        QTableWidgetItem* pItemPort = new QTableWidgetItem(m_vecInputPort[i]);
-        ui->tableWidget_input->setItem(0, i, pItemPort);
+    //for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
+    //{
+    //    QTableWidgetItem* pItemPort = new QTableWidgetItem(m_vecInputPort[i]);
+    //    ui->tableWidget_input->setItem(0, i, pItemPort);
 
-        QTableWidgetItem* pItemValue = new QTableWidgetItem(QString::number(vecInputValue.at(i)));
-        ui->tableWidget_input->setItem(1, i, pItemValue);
+    //    QTableWidgetItem* pItemValue = new QTableWidgetItem(QString::number(vecInputValue.at(i)));
+    //    ui->tableWidget_input->setItem(1, i, pItemValue);
 
-    }
+    //}
 
     ui->tableWidget_output->clearContents();
     ui->tableWidget_output->setColumnCount(m_mapOutputPort[m_iAlgorithmNum].size());
+
+    //for (int i = 0; i < ui->tableWidget_output->columnCount(); i++)
+    //{
+    //    QTableWidgetItem* pItemPort = new QTableWidgetItem(m_mapOutputPort[m_iAlgorithmNum].at(i));
+    //    pItemPort->setCheckState(Qt::Unchecked);
+    //    ui->tableWidget_output->setItem(0, i, pItemPort);
+
+    //    QTableWidgetItem* pItemValue = new QTableWidgetItem("");
+    //    ui->tableWidget_output->setItem(1, i, pItemValue);
+
+    //}
+
+    std::thread thread_(&operstionWidget::load_tableWidget_show, this);
+    thread_.join();
+
+}
+
+int operstionWidget::get_algorithm_num()
+{
+    return m_iAlgorithmNum;
+}
+
+//void operstionWidget::set_port_relevance(int srcOutIndex, int srcAlgorithNum, int dstInputIndex)
+//{
+//    /*auto &multMap = m_mapMultPort[dstInputIndex];
+//    multMap.remove(srcAlgorithNum, srcOutIndex);
+//    multMap.insert(srcAlgorithNum, dstInputIndex);*/
+//   
+//}
+
+void operstionWidget::load_tableWidget_show()
+{
+
+   // ui->tableWidget_input->clearContents();
+   // ui->tableWidget_input->setColumnCount(m_vecInputPort.size());
+   
+    int count = ui->tableWidget_input->columnCount();
+    if (m_vecInputValue.size() == m_vecInputPort.size())
+    {
+      
+        for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
+        {
+            QTableWidgetItem* pItemPort = new QTableWidgetItem(m_vecInputPort[i]);
+            ui->tableWidget_input->setItem(0, i, pItemPort);
+
+            QTableWidgetItem* pItemValue = new QTableWidgetItem(QString::number(m_vecInputValue.at(i)));
+            ui->tableWidget_input->setItem(1, i, pItemValue);
+
+        }
+    }
+    else
+    {
+        QTableWidgetItem* pItem;
+        for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
+        {
+            pItem = new QTableWidgetItem(m_vecInputPort[i]);
+            ui->tableWidget_input->setItem(0, i, pItem);
+
+
+            pItem = new QTableWidgetItem("");
+            ui->tableWidget_input->setItem(1, i, pItem);
+        }
+    }
+   
+
+   // ui->tableWidget_output->clearContents();
+    //ui->tableWidget_output->setColumnCount(m_mapOutputPort[m_iAlgorithmNum].size());
 
     for (int i = 0; i < ui->tableWidget_output->columnCount(); i++)
     {
@@ -486,14 +565,161 @@ void operstionWidget::load_data_conguration(const QVector<QString>& vecInputPort
         ui->tableWidget_output->setItem(1, i, pItemValue);
 
     }
+}
 
+void operstionWidget::use_fmu_caculate()
+{
+    //传入输出；
+    std::vector<double> vecDoule;
+    for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
+    {
+        auto pItem = ui->tableWidget_input->item(1, i);
+        if (pItem)
+        {
+            vecDoule.push_back(pItem->text().toDouble());
+        }
+        else
+        {
+            vecDoule.push_back(0.0);
+        }
+    }
+
+    // 传给算法;
+    //std::string exe_config_paths = "D:\\CS\\atspaceMicroTimer.fmu";//m_fileInfo.filePath().toStdString();
+    std::string exe_config_paths = m_fileInfo.absoluteFilePath().toStdString();
+    const std::string fmu_path = string_To_UTF8(exe_config_paths);
+    fmi2::fmu fmu(fmu_path);
+    auto cs_fmu = fmu.as_cs_fmu();
+    auto md = cs_fmu->get_model_description();
+    auto slave1 = cs_fmu->new_instance();
+    slave1->setup_experiment();
+    slave1->enter_initialization_mode();
+    slave1->exit_initialization_mode();
+
+
+    std::vector<fmi2Real> wef(m_vecInputValueReference.size());
+    std::vector<fmi2Real> ref(m_vecOutputValueReference.size());
+
+
+    for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
+    {
+        auto pItem = ui->tableWidget_input->item(1, i);
+        if (pItem)
+        {
+            wef[i] = pItem->text().toDouble();
+        }
+        else
+        {
+            wef[i] = 0.0;
+        }
+    }
+
+
+    if (!slave1->write_real(m_vecInputValueReference, wef))
+    {
+        return;
+    }
+
+    if (!slave1->step(stepSize))
+    {
+        return;
+    }
+
+    if (!slave1->read_real(m_vecOutputValueReference, ref))
+    {
+        return;
+    }
+
+    // 接受算法输出进行显示;
+    m_mapAllOutputData[m_iAlgorithmNum][m_iCalculateCount] = ref;
+
+ /*   ui->comboBox_countShow->addItem(QString::number(m_iCalculateCount));
+    int index = m_iCalculateCount - 1;
+    ui->comboBox_countShow->setCurrentIndex(index);*/
+}
+
+void operstionWidget::get_relevacne_port_data()
+{
+    auto vecNewData = m_mapAllOutputData[m_iAlgorithmNum][m_iCalculateCount];
+    // <算法，端口，要更新的值>
+    QMap<int, QMap<int, double>> mapNewData;
+   // QMap<int, QMap<int, QMap<int, int>>>
+    for (auto groupIt = m_mapRelevance.begin(); groupIt != m_mapRelevance.end(); ++groupIt)
+    {
+        int recvAlgorithNum = groupIt.key();
+
+        // 内层循环遍历第二层键值对
+        for (auto input_itor = groupIt.value().begin(); input_itor != groupIt.value().end(); ++input_itor)
+        {
+            int recvInput = input_itor.key();
+            int i = 0;
+            for (auto dstNumIt = input_itor.value().begin(); dstNumIt != input_itor.value().end(); ++dstNumIt)
+            {
+                int sendAlgorithmNum = dstNumIt.key();
+                if (sendAlgorithmNum == m_iAlgorithmNum)
+                {
+
+                    // 获取端口的值;
+                    auto sendPortIndex = dstNumIt.value();
+                    double value = vecNewData[sendPortIndex];
+                    mapNewData[recvAlgorithNum][recvInput] = value;
+                    break;
+                }
+                i++;
+            }
+            
+        }
+    }
+    if (mapNewData.size() > 0)
+    {
+         emit signal_update_port_data(mapNewData);
+    }
+   
+   /* for (const auto& dstAlgorithmDataData : m_mapRelevance)
+    {
+        for (auto& srcInputData: dstAlgorithmDataData)
+        {
+            int iInputIndx = srcInputData.first();
+            for (auto srcAlgorithmData : srcInputData)
+            {
+                if (srcAlgorithmData。 == m_iAlgorithmNum)
+                {
+
+                }
+            }
+        }
+       */
+    //}
+
+
+}
+
+void operstionWidget::update_prot_data(QMap<int, double> portData)
+{
+    for (auto groupIt = portData.begin(); groupIt != portData.end(); ++groupIt)
+    {
+        auto pItem = ui->tableWidget_input->item(1, groupIt.key());
+        if (pItem)
+        {
+            pItem->setText(QString::number(groupIt.value()));
+        }
+    }
+
+   /* for (int i = 0; i < portData.size(); i++)
+    {
+        auto pItem = ui->tableWidget_input->item(1, portData.key());
+        if (pItem)
+        {
+            pItem->setText(QString::number(portData[i]));
+        }
+    }*/
 }
 
 
 
 void operstionWidget::slot_btnChooseFile()
 {
-
+    
     QString file_full, file_name, current_Path, file_path, file_suffix, complete_suffix, file_baseName, file_completeBaseName ;
     QFileInfo fileinfo; 
     m_fileInfo =QFileDialog::getOpenFileName(this, "Open File", "QCoreApplication::applicationFilePath()",
@@ -503,7 +729,8 @@ void operstionWidget::slot_btnChooseFile()
     {
         return;
     }
-       
+    m_mapRelevance.remove(m_iAlgorithmNum);
+ 
 
     ui->label_algorithm->setText(m_fileInfo.fileName());
     m_mapAlgorithmName[m_iAlgorithmNum]=m_fileInfo.fileName();
@@ -569,8 +796,29 @@ void operstionWidget::slot_tableWidgetCustomContextMenuRequested(const QPoint &p
     dialog.init();
     if(dialog.exec() ==QDialog::Accepted)
     {
-       QString strValue = dialog.getInputValue();
-       pItem->setText(strValue);
+       //QString strValue = dialog.getInputValue();
+
+        QString value;
+       int sendAlgorithmNum; 
+       int sendOutputIndex;
+       dialog.getRelevanceData(sendAlgorithmNum, sendOutputIndex, value);
+       pItem->setText(value);
+       if (sendAlgorithmNum != m_iAlgorithmNum)
+       {
+           int col = pItem->column();
+           // 建立端口关联关系;
+           //emit signal_port_relevance(srcAlgorithmNum, srcOutputIndex, m_iAlgorithmNum, pItem->column());
+           auto& data = m_mapRelevance[m_iAlgorithmNum];
+           data.remove(col);
+           data[col][sendAlgorithmNum] = sendOutputIndex;
+       }
+       else
+       {
+           // 自己的端口是否关联;
+       }
+
+       
+
     }
 }
 
@@ -589,75 +837,80 @@ void operstionWidget::slot_btnCalculate()
     }
 
     m_iCalculateCount++;
+
+    std::thread thread_(&operstionWidget::use_fmu_caculate, this);
+    thread_.join();
    
-    //传入输出；
-    std::vector<double> vecDoule;
-    for(int i=0;i<ui->tableWidget_input->columnCount();i++)
-    {
-      auto pItem = ui->tableWidget_input->item(1,i);
-      if(pItem)
-      {
-          vecDoule.push_back(pItem->text().toDouble());
-      }
-      else
-      {
-          vecDoule.push_back(0.0);
-      }
-    }
+    ////传入输出；
+    //std::vector<double> vecDoule;
+    //for(int i=0;i<ui->tableWidget_input->columnCount();i++)
+    //{
+    //  auto pItem = ui->tableWidget_input->item(1,i);
+    //  if(pItem)
+    //  {
+    //      vecDoule.push_back(pItem->text().toDouble());
+    //  }
+    //  else
+    //  {
+    //      vecDoule.push_back(0.0);
+    //  }
+    //}
 
-    // 传给算法;
-    //std::string exe_config_paths = "D:\\CS\\atspaceMicroTimer.fmu";//m_fileInfo.filePath().toStdString();
-    std::string exe_config_paths = m_fileInfo.absoluteFilePath().toStdString();
-    const std::string fmu_path = string_To_UTF8(exe_config_paths);
-    fmi2::fmu fmu(fmu_path);
-    auto cs_fmu = fmu.as_cs_fmu();
-    auto md = cs_fmu->get_model_description();
-    auto slave1 = cs_fmu->new_instance();
-    slave1->setup_experiment();
-    slave1->enter_initialization_mode();
-    slave1->exit_initialization_mode();
+    //// 传给算法;
+    ////std::string exe_config_paths = "D:\\CS\\atspaceMicroTimer.fmu";//m_fileInfo.filePath().toStdString();
+    //std::string exe_config_paths = m_fileInfo.absoluteFilePath().toStdString();
+    //const std::string fmu_path = string_To_UTF8(exe_config_paths);
+    //fmi2::fmu fmu(fmu_path);
+    //auto cs_fmu = fmu.as_cs_fmu();
+    //auto md = cs_fmu->get_model_description();
+    //auto slave1 = cs_fmu->new_instance();
+    //slave1->setup_experiment();
+    //slave1->enter_initialization_mode();
+    //slave1->exit_initialization_mode();
 
 
-    std::vector<fmi2Real> wef(m_vecInputValueReference.size());
-    std::vector<fmi2Real> ref(m_vecOutputValueReference.size());
+    //std::vector<fmi2Real> wef(m_vecInputValueReference.size());
+    //std::vector<fmi2Real> ref(m_vecOutputValueReference.size());
    
 
-    for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
-    {
-        auto pItem = ui->tableWidget_input->item(1, i);
-        if (pItem)
-        {
-            wef[i]=pItem->text().toDouble();
-        }
-        else
-        {
-            wef[i] = 0.0;
-        }
-    }
+    //for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
+    //{
+    //    auto pItem = ui->tableWidget_input->item(1, i);
+    //    if (pItem)
+    //    {
+    //        wef[i]=pItem->text().toDouble();
+    //    }
+    //    else
+    //    {
+    //        wef[i] = 0.0;
+    //    }
+    //}
 
 
-    if (!slave1->write_real(m_vecInputValueReference, wef))
-    {
-        return;
-    }
+    //if (!slave1->write_real(m_vecInputValueReference, wef))
+    //{
+    //    return;
+    //}
    
-    if (!slave1->step(stepSize))
-    {
-        return;
-    }
-    
-    if (!slave1->read_real(m_vecOutputValueReference, ref))
-    {
-        return;
-    }
+    //if (!slave1->step(stepSize))
+    //{
+    //    return;
+    //}
+    //
+    //if (!slave1->read_real(m_vecOutputValueReference, ref))
+    //{
+    //    return;
+    //}
    
-    // 接受算法输出进行显示;
-    m_mapAllOutputData[m_iAlgorithmNum][m_iCalculateCount] = ref;
+    //// 接受算法输出进行显示;
+    //m_mapAllOutputData[m_iAlgorithmNum][m_iCalculateCount] = ref;
 
     ui->comboBox_countShow->addItem(QString::number(m_iCalculateCount));
     int index = m_iCalculateCount - 1;
     ui->comboBox_countShow->setCurrentIndex(index);
    
+
+    get_relevacne_port_data();
 }
 
 void operstionWidget::slot_btnClear()
@@ -712,6 +965,7 @@ void operstionWidget::slot_btnCurveShow()
     }
     curveShowDialog dialog;
     dialog.setCurveSHowData(m_iCalculateCount,mapShowData);
+    dialog.resize(1000, 900);
     dialog.exec();
 
 }
@@ -735,4 +989,9 @@ void operstionWidget::slot_comboxPaiNumChanged(int index)
         }
 
     }
+}
+
+void operstionWidget::slot_tableWidgetCellEntered(int row, int column)
+{
+    qDebug() << "slot_tableWidgetCellEntered " << row << column;
 }

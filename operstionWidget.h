@@ -6,6 +6,9 @@
 #include <QFile>
 #include <QSet>
 #include <QDomDocument>
+#include <QMultiMap>
+
+#include<thread>
 
 #include "fmi4cpp/fmi4cpp.hpp"
 
@@ -33,8 +36,23 @@ public:
 
     void load_algorithm_conguration(const QString filePath);
     void load_data_conguration(const QVector<QString> &vecInputPort, std::vector<fmi2ValueReference> &vecInputValueReference,const QVector<double>& vecInputValue, const QVector<QString>& vecOutputPort, std::vector<fmi2ValueReference>& vecOutputValueReference );
+    int get_algorithm_num();
+    //void set_port_relevance(int srcOutIndex, int dstSrcAlgorithNum, int dstInputIndex);
+    void update_prot_data(QMap<int, double> portData);
 private:
 
+    void load_tableWidget_show();
+    void use_fmu_caculate();
+
+    // 更新关联端口数据;
+    void get_relevacne_port_data();
+
+   
+signals:
+    // 端口关联信号;
+   // void signal_port_relevance(int srcAlgorithNum, int srcOutIndex, int dstSrcAlgorithNum, int dstInputIndex);
+
+    void signal_update_port_data(QMap<int, QMap<int, double>> mapNewData);
 private slots:
     void slot_btnChooseFile();
     void slot_tableWigdetCheckedChanged(int row, int col);
@@ -45,6 +63,7 @@ private slots:
     void slot_btnCurveShow();
 
     void slot_comboxPaiNumChanged(int index);
+    void slot_tableWidgetCellEntered(int row, int column);
 private:
     Ui::operstionWidget *ui;
     int m_iAlgorithmNum=0;// 算法顺序数;
@@ -52,13 +71,15 @@ private:
     QVector<QString> m_vecInputPort;   // 输入端口;
     QSet<int> m_setOutputIndex;
 
+    
     int m_iCalculateCount =0;
-
+    std::thread							m_thread;
     std::vector<fmi2ValueReference> m_vecInputValueReference;
 
     std::vector<fmi2ValueReference> m_vecOutputValueReference; 
-
-
+    QVector<double> m_vecInputValue;
+     //m_mapMultPort;// < 算法num <自身输入端口位，<算法num，关联的输出端口>>
+    static QMap<int, QMap<int, QMap<int, int>>> m_mapRelevance;
    static QMap<int,QString> m_mapAlgorithmName;// 算法名称；
    static QMap<int,QVector<QString>> m_mapOutputPort; //输出端口;
    static std::map<int,std::map<int,std::vector<double>>> m_mapAllOutputData; // <<算法顺序，<拍数，输出结果>>;

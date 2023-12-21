@@ -2,6 +2,7 @@
 #define WIDGET_H
 
 #include <QWidget>
+#include <QMap>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
@@ -15,6 +16,11 @@ public:
     Widget(QWidget *parent = nullptr);
     ~Widget();
 
+
+    struct myUseData :QObjectUserData 
+    {
+        int iAlgorithmNum;
+    };
 private slots:
     void  slot_widgetCustomContextMenuRequested(const QPoint &pos);
 
@@ -23,6 +29,10 @@ private slots:
     bool load_xml_configuration();
 
     void initialize_configuration();
+
+   // void slot_setRelevance(int srcAlgorithNum, int srcOutIndex, int dstSrcAlgorithNum, int dstInputIndex);
+
+    void slot_update_prot_data(QMap<int, QMap<int, double>> mapNewData);
 
 private:
     Ui::Widget *ui;

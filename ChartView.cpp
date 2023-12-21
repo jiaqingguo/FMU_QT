@@ -101,7 +101,7 @@ void ChartView::wheelEvent(QWheelEvent* event)
 		
 		this->chart()->axisY()->setRange(yCentral - bottomOffset, yCentral + topOffset);
 	}
-	else
+	if(true)
 	{//XÖá
 		QtCharts::QValueAxis * axisX = dynamic_cast<QtCharts::QValueAxis*>(this->chart()->axisX());
 		const double xMin = axisX->min();

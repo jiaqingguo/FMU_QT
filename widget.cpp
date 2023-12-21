@@ -1,6 +1,7 @@
 ﻿#include <QMenu>
 #include <QDomDocument>
 #include <QTextStream>
+#include <QFileDialog>
 #include <qdebug.h>
 
 #include <qmessagebox.h>
@@ -25,10 +26,12 @@ Widget::Widget(QWidget *parent)
     m_iAlgorithmNum++;
     QString strName = QString::fromLocal8Bit("算法")+QString::number(m_iAlgorithmNum);
     operstionWidget *pWidget = new operstionWidget(m_iAlgorithmNum);
-    ui->tabWidget->addTab(pWidget,strName);
-
+    connect(pWidget, &operstionWidget::signal_update_port_data, this, &Widget::slot_update_prot_data);
+    /*int tabIndex=*/ ui->tabWidget->addTab(pWidget,strName);
+   /* myUseData *pData=new myUseData;
+    pData->iAlgorithmNum = m_iAlgorithmNum;*/
+   // ui->tabWidget->setUserData(tabIndex, pData);
     connect(this,&Widget::customContextMenuRequested,this,&Widget::slot_widgetCustomContextMenuRequested);
-
 
 }
 
@@ -39,8 +42,19 @@ Widget::~Widget()
 
 void Widget::create_xml_configuration()
 {
+
+    QString str_xml_path = QFileDialog::getSaveFileName(this,
+        tr("Save Config"),
+        "",
+        tr("Config Files (*.xml)"));
+
+    if (str_xml_path.isNull())
+    {
+        //点的是取消
+        return ;
+    }
    
-    QString str_xml_path = QCoreApplication::applicationDirPath() + "/" + "configuration.xml";
+   // QString str_xml_path = QCoreApplication::applicationDirPath() + "/" + "configuration.xml";
     //QString strNameTemp = Win0rLinuxFilePath(strName);
     QFile file(str_xml_path);
 
@@ -73,15 +87,8 @@ void Widget::create_xml_configuration()
         }
     }
    
-
-
-
-
     //添加根元素
     doc.appendChild(root);
-
-
-
 
 
     ////添加第一个book元素及其子元素
@@ -95,7 +102,6 @@ void Widget::create_xml_configuration()
 
     //AlgorithmNum.setAttributeNode(filePath);
     //AlgorithmNum.setAttributeNode(num);
-
 
 
     //// 输入端口相关数据
@@ -174,8 +180,20 @@ void Widget::create_xml_configuration()
 
 bool Widget::load_xml_configuration()
 {
+    QString file_full, file_name, current_Path, file_path, file_suffix, complete_suffix, file_baseName, file_completeBaseName;
+    QFileInfo fileinfo;
+    QString strFilePath = QFileDialog::getOpenFileName(this, "Open File", "QCoreApplication::applicationFilePath()",
+        "AllFile (*.xml);;");
 
-    QFile file(QCoreApplication::applicationDirPath() + "/" + "configuration.xml");
+    if (strFilePath.isEmpty())
+    {
+        return false;
+    }
+    // 先清除配置;
+    initialize_configuration();
+
+   // QFile file(QCoreApplication::applicationDirPath() + "/" + "configuration.xml");
+    QFile file(strFilePath);
     if (!file.open(QIODevice::ReadOnly))
     {
         return false;
@@ -208,6 +226,8 @@ bool Widget::load_xml_configuration()
             m_iAlgorithmNum = e_AlgorithmNum.attribute("num").toInt();
             QString strName = QString::fromLocal8Bit("算法") + QString::number(m_iAlgorithmNum);
             operstionWidget* pWidget = new operstionWidget(m_iAlgorithmNum);
+            connect(pWidget, &operstionWidget::signal_update_port_data, this, &Widget::slot_update_prot_data);
+
             ui->tabWidget->addTab(pWidget, strName);
 
             pWidget->load_algorithm_conguration(algorithmNum_path);
@@ -270,6 +290,49 @@ void Widget::initialize_configuration()
     m_iAlgorithmNum = 0;
 }
 
+//void Widget::slot_setRelevance(int srcAlgorithNum, int srcOutIndex, int dstSrcAlgorithNum, int dstInputIndex)
+//{
+//    int count = ui->tabWidget->count();
+//    for (int i = 0; i < count; i++)
+//    {
+//        QWidget* pWidget = ui->tabWidget->widget(i);
+//        operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
+//        
+//        if (pOperstionWidget->get_algorithm_num() == srcAlgorithNum)
+//        {
+//            pOperstionWidget->set_port_relevance(srcOutIndex, dstSrcAlgorithNum, dstInputIndex);
+//            break;
+//        }
+//    }
+//}
+
+void Widget::slot_update_prot_data(QMap<int, QMap<int, double>> mapNewData)
+{
+    for (auto groupIt = mapNewData.begin(); groupIt != mapNewData.end(); ++groupIt) // 遍历算法数据;
+    {
+        int srcAlgorithNum = groupIt.key();
+
+        int count = ui->tabWidget->count();
+        for (int i = 0; i < count; i++)  // 遍历算法界面;
+        {
+            QWidget* pWidget = ui->tabWidget->widget(i);
+            operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
+        
+            if (pOperstionWidget->get_algorithm_num() == srcAlgorithNum)
+            {
+                auto newData = mapNewData[srcAlgorithNum];
+
+
+                pOperstionWidget->update_prot_data(newData);
+                break;
+            }
+        }
+
+
+    }
+
+}
+
 void Widget::slot_widgetCustomContextMenuRequested(const QPoint &pos)
 {
     QMenu menu;
@@ -288,6 +351,7 @@ void Widget::slot_widgetCustomContextMenuRequested(const QPoint &pos)
         m_iAlgorithmNum++;
         QString strName = QString::fromLocal8Bit("算法")+QString::number(m_iAlgorithmNum);
         operstionWidget *pWidget = new operstionWidget(m_iAlgorithmNum);
+        connect(pWidget, &operstionWidget::signal_update_port_data, this, &Widget::slot_update_prot_data);
         int index =ui->tabWidget->addTab(pWidget,strName);
         ui->tabWidget->setCurrentIndex(index);
     });
@@ -306,7 +370,6 @@ void Widget::slot_widgetCustomContextMenuRequested(const QPoint &pos)
     });
     connect(load_configuration, &QAction::triggered, [=]()
     {
-            initialize_configuration();
            
             load_xml_configuration();
 
