@@ -20,7 +20,7 @@ public:
 	void start_thread(fum_thread* pThread);	// 开启线程
 	void start_thread(const int& number);	// 开启线程
 	void start_thread(const int& number, const std::vector<double>& vecInputValue);	// 开启线程
-
+	void start_next_thread(const int &finsh_num);
 	void stop_all_thread();							// 停止所有线程
 
 //	void stopASortOfVehicleType(int iVehicleType);
@@ -28,6 +28,8 @@ public:
 
 	void stop();
 
+signals:
+	void signal_fmu_thread_finished(int tab, const  std::vector<double> vecOutputValue);
 private slots:
 
 	void slot_thread_finished();					// 释放线程
@@ -36,6 +38,8 @@ private:
 	static thread_pool* m_pSelf;
 	//QList<fum_thread*>			m_runningThread;
 	QMap<int, fum_thread*>		m_mapThread;
+	int m_next_thread_num = -1;
+	bool m_bRun_control = true;
 
 };
 

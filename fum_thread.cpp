@@ -65,6 +65,8 @@ std::vector<fmi2Real> fum_thread::get_output_data()
     return m_vecOutputValue;
 }
 
+
+
 //std::vector<fmi2Real> get_output_data()
 //{
 //   // return m_vecOutputValue;
@@ -98,7 +100,7 @@ void fum_thread::run()
         //std::vector<fmi2Real> ref(m_vecOutputValueReference.size());
         m_vecOutputValue.resize(m_vecOutputValueReference.size());
 
-        m_vecOutputValue.clear();
+        
 
         if (!slave1->write_real(m_vecInputValueReference, m_vecInputValue))
         {

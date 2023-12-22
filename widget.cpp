@@ -39,12 +39,52 @@ Widget::Widget(QWidget *parent)
     connect(this,&Widget::customContextMenuRequested,this,&Widget::slot_widgetCustomContextMenuRequested);
     connect(ui->btn_calculate_control, &QPushButton::clicked, this, &Widget::slot_btn_calculate_control);
 
+    connect(m_pThread_pool->instance(), &thread_pool::signal_fmu_thread_finished, this, &Widget::slot_fmu_thread_finished);
+
     g_pWidget = this;
 }
 
 Widget::~Widget()
 {
     delete ui;
+}
+
+void Widget::slot_thread_finished()
+{
+    fum_thread* pThread = static_cast<fum_thread*>(sender());
+    if (pThread)
+    {
+        // 1.获得线程执行结果 刷新主界面;
+      // 1.1 刷新结果
+        auto vecOutputData = pThread->get_output_data();
+
+        int tab = pThread->get_cur_tab();
+
+        
+        update_algorithm_tableWidget_out(tab, vecOutputData);
+
+        // 1.2刷新 关联端口;
+       
+
+        qDebug() << "thread " << pThread->get_thread_number() << "end------!";
+
+
+        int number = pThread->get_thread_number();
+        // 移除执行完的线程;
+        m_pThread_pool->instance()->start_next_thread(number);
+        int next_number = pThread->get_thread_number() + 1;
+
+        
+        m_pThread_pool->instance()->start_thread(next_number);
+        pThread->deleteLater();
+    }
+  
+    // 2.开启下一个线程;
+}
+
+void Widget::slot_fmu_thread_finished(int tab, const std::vector<double> vecOutputValue)
+{
+    update_algorithm_tableWidget_out(tab, vecOutputValue);
 }
 
 void Widget::update_algorithm_tableWidget_out(const int& tab, const std::vector<double>& vecOutputValue)
@@ -419,7 +459,7 @@ void Widget::slot_recv_calculate_control(int flag, int calculate_count/* = 0*/)
                 pThread->set_input_reference(pOperstionWidget->get_input_reference());
                 pThread->set_output_reference(pOperstionWidget->get_output_reference());
                 
-
+              
                 m_pThread_pool->instance()->add_thread(pThread, thread_count);
 
                 thread_count++;

@@ -27,7 +27,7 @@ public:
         int iAlgorithmNum;
     };
 
-
+    
     void update_algorithm_tableWidget_out(const int& tab, const  std::vector<double> & vecOutputValue);
     std::vector<double>  get_algorithm_tableWidget_input(const int& tab);
 
@@ -49,7 +49,8 @@ private slots:
 
     void slot_recv_calculate_control(int flag,int calculate_count/* = 0*/);
 
-    
+    void slot_thread_finished();					//  Õ∑≈œﬂ≥Ã
+    void slot_fmu_thread_finished(int tab, const  std::vector<double> vecOutputValue);
 private:
     Ui::Widget *ui;
     int m_iAlgorithmNum=0;

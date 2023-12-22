@@ -44,7 +44,7 @@ void thread_pool::start_thread(const int& number)
 	if (m_mapThread.contains(number))
 	{
 		auto& pThread = m_mapThread[number];
-		//pThread->start();
+		pThread->start();
 	}
 }
 
@@ -57,6 +57,28 @@ void thread_pool::start_thread(const int& number, const std::vector<double>& vec
 		pThread->start();
 	}
 }
+
+void thread_pool::start_next_thread(const int& finsh_num)
+{
+	m_mapThread.remove(finsh_num);
+	//pThread->deleteLater();
+	
+	// 2.开启下一个线程;
+
+	//int next_number = finsh_num + 1;
+	//if (m_mapThread.contains(next_number))
+	//{
+	//	fum_thread* pThread_next = m_mapThread[next_number];
+	//	int tab = pThread_next->get_cur_tab();
+	//	// 2.1 获得输入;
+	//	//auto vecInputValue = g_pWidget->get_algorithm_tableWidget_input(tab);
+	//	//pThread_next->set_input_value(vecInputValue);
+
+	//	pThread_next->start();
+	//}
+}
+
+
 
 void thread_pool::stop_all_thread()
 {
@@ -121,22 +143,27 @@ void thread_pool::slot_thread_finished()
 		auto vecOutputData =pThread->get_output_data();
 		
 		int tab = pThread->get_cur_tab();
-		//g_pWidget->update_algorithm_tableWidget_out(tab, vecOutputData);
 		
-
-		// 1.2刷新 关联端口;
+		g_pWidget->update_algorithm_tableWidget_out(tab, vecOutputData);
+		//emit signal_fmu_thread_finished(tab, vecOutputData);
+		
 
 
 		qDebug() << "thread " << pThread->get_thread_number() << "end------!";
 
 
-
+		int number = pThread->get_thread_number();
 
 		int next_number = pThread->get_thread_number() + 1;
 		// 移除执行完的线程;
 		m_mapThread.remove(pThread->get_thread_number());
 		//pThread->deleteLater();
 		pThread->wait();
+		pThread->deleteLater();
+
+		// 1.2刷新 关联端口;
+		// 
+		// 
 
 		// 2.开启下一个线程;
 		
@@ -146,10 +173,10 @@ void thread_pool::slot_thread_finished()
 			fum_thread* pThread_next = m_mapThread[next_number];
 			int tab = pThread_next->get_cur_tab();
 			// 2.1 获得输入;
-			//auto vecInputValue = g_pWidget->get_algorithm_tableWidget_input(tab);
-			//pThread_next->set_input_value(vecInputValue);
+			auto vecInputValue = g_pWidget->get_algorithm_tableWidget_input(tab);
+			pThread_next->set_input_value(vecInputValue);
 
-			pThread->start();
+			pThread_next->start();
 		}
 	}
 }

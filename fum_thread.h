@@ -26,6 +26,7 @@ public:
     void set_input_data(const std::vector<fmi2Real>& vecInputValue, const std::vector<fmi2ValueReference>& vecInputValueReference);
     void set_output_reference(const std::vector<fmi2ValueReference>& vecOutputValueReference);
     std::vector<fmi2Real> get_output_data();
+   
 private:
     void run();
 
