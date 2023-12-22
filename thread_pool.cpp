@@ -50,6 +50,7 @@ void thread_pool::start_thread(const int& number)
 
 void thread_pool::start_thread(const int& number, const std::vector<double>& vecInputValue)
 {
+	m_control_flags = 1;
 	if (m_mapThread.contains(number))
 	{
 		auto& pThread = m_mapThread[number];
@@ -58,24 +59,18 @@ void thread_pool::start_thread(const int& number, const std::vector<double>& vec
 	}
 }
 
-void thread_pool::start_next_thread(const int& finsh_num)
+void thread_pool::start_next_thread()
 {
-	m_mapThread.remove(finsh_num);
-	//pThread->deleteLater();
-	
-	// 2.开启下一个线程;
+	if (m_mapThread.contains(m_next_thread_num))
+	{
+		fum_thread* pThread_next = m_mapThread[m_next_thread_num];
+		int tab = pThread_next->get_cur_tab();
+		// 2.1 获得输入;
+		auto vecInputValue = g_pWidget->get_algorithm_tableWidget_input(tab);
+		pThread_next->set_input_value(vecInputValue);
 
-	//int next_number = finsh_num + 1;
-	//if (m_mapThread.contains(next_number))
-	//{
-	//	fum_thread* pThread_next = m_mapThread[next_number];
-	//	int tab = pThread_next->get_cur_tab();
-	//	// 2.1 获得输入;
-	//	//auto vecInputValue = g_pWidget->get_algorithm_tableWidget_input(tab);
-	//	//pThread_next->set_input_value(vecInputValue);
-
-	//	pThread_next->start();
-	//}
+		pThread_next->start();
+	}
 }
 
 
@@ -105,29 +100,42 @@ void thread_pool::stop_thread(const int& number)
 
 void thread_pool::stop()
 {
-	for (auto itor = m_mapThread.begin(); itor != m_mapThread.end(); ++itor)
+	for (auto itor = m_mapThread.begin(); itor != m_mapThread.end(); )
 	{
 		fum_thread* pThread = itor.value();
 		if (pThread)
 		{
 			if (pThread->isRunning())
 			{
-				pThread->quit();
 				pThread->wait();
-				
 			}
-
-			m_mapThread.remove(pThread->get_thread_number());
-
-			// 1.获得线程执行结果 刷新主界面;
-			// 1.1 刷新输出结果;
+			//int key = itor.key();
+			itor= m_mapThread.erase(itor);
 			
-			// 1.2刷新 关联端口;
-
 
 			pThread->deleteLater();
 		}
 	}
+}
+
+void thread_pool::run_contral(const int& flags)
+{
+	
+	if (flags == 1 || flags==3) // 继续
+	{
+		m_control_flags = 1;
+		start_next_thread();
+	}
+	else if (flags == 0) //停止;
+	{
+		m_control_flags = flags;
+		stop();
+	}
+	else if (flags == 2)// 如何是暂停 其他函数会判断;
+	{
+		m_control_flags = flags;
+	}
+
 }
 
 
@@ -136,8 +144,6 @@ void thread_pool::slot_thread_finished()
 	fum_thread * pThread = static_cast<fum_thread*>(sender());
 	if (pThread)
 	{
-		
-
 		// 1.获得线程执行结果 刷新主界面;
 		// 1.1 刷新结果
 		auto vecOutputData =pThread->get_output_data();
@@ -154,7 +160,7 @@ void thread_pool::slot_thread_finished()
 
 		int number = pThread->get_thread_number();
 
-		int next_number = pThread->get_thread_number() + 1;
+		m_next_thread_num = pThread->get_thread_number() + 1;
 		// 移除执行完的线程;
 		m_mapThread.remove(pThread->get_thread_number());
 		//pThread->deleteLater();
@@ -165,18 +171,31 @@ void thread_pool::slot_thread_finished()
 		// 
 		// 
 
-		// 2.开启下一个线程;
-		
 
-		if (m_mapThread.contains(next_number))
+		// 全部执行完毕 重置控制按钮状态;
+		if (m_mapThread.size() == 0)
 		{
-			fum_thread* pThread_next = m_mapThread[next_number];
-			int tab = pThread_next->get_cur_tab();
-			// 2.1 获得输入;
-			auto vecInputValue = g_pWidget->get_algorithm_tableWidget_input(tab);
-			pThread_next->set_input_value(vecInputValue);
-
-			pThread_next->start();
+			g_pWidget->reset_control_btns();
 		}
+		// 2.开启下一个线程;
+		if (m_control_flags==1)
+		{
+			start_next_thread();
+		}
+	/*	else if(m_control_flags==)
+		{
+
+		}*/
+
+		//if (m_mapThread.contains(m_next_thread_num))
+		//{
+		//	fum_thread* pThread_next = m_mapThread[m_next_thread_num];
+		//	int tab = pThread_next->get_cur_tab();
+		//	// 2.1 获得输入;
+		//	auto vecInputValue = g_pWidget->get_algorithm_tableWidget_input(tab);
+		//	pThread_next->set_input_value(vecInputValue);
+
+		//	pThread_next->start();
+		//}
 	}
 }

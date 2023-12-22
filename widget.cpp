@@ -51,35 +51,7 @@ Widget::~Widget()
 
 void Widget::slot_thread_finished()
 {
-    fum_thread* pThread = static_cast<fum_thread*>(sender());
-    if (pThread)
-    {
-        // 1.获得线程执行结果 刷新主界面;
-      // 1.1 刷新结果
-        auto vecOutputData = pThread->get_output_data();
-
-        int tab = pThread->get_cur_tab();
-
-        
-        update_algorithm_tableWidget_out(tab, vecOutputData);
-
-        // 1.2刷新 关联端口;
-       
-
-        qDebug() << "thread " << pThread->get_thread_number() << "end------!";
-
-
-        int number = pThread->get_thread_number();
-        // 移除执行完的线程;
-        m_pThread_pool->instance()->start_next_thread(number);
-        int next_number = pThread->get_thread_number() + 1;
-
-        
-        m_pThread_pool->instance()->start_thread(next_number);
-        pThread->deleteLater();
-    }
-  
-    // 2.开启下一个线程;
+    
 }
 
 void Widget::slot_fmu_thread_finished(int tab, const std::vector<double> vecOutputValue)
@@ -121,6 +93,11 @@ void Widget::calculate_control(int count)
         }
         qDebug() << "calculate_control()" << i;
     }
+}
+
+void Widget::reset_control_btns()
+{
+    m_calculate_control_dialog->reset_btns();
 }
 
 void Widget::create_xml_configuration()
@@ -476,7 +453,7 @@ void Widget::slot_recv_calculate_control(int flag, int calculate_count/* = 0*/)
     }
     else
     {
-       // m_iThreadCount = 0;
+        m_pThread_pool->instance()->run_contral(flag);
     }
 }
 

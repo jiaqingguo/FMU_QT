@@ -14,6 +14,8 @@ class calculate_control_dialog : public QDialog
 public:
     explicit calculate_control_dialog(QWidget *parent = nullptr);
     ~calculate_control_dialog();
+
+    void reset_btns();
 signals:
     void signal_calculate_control(int flag,int count/* =0*/);
 private slots:

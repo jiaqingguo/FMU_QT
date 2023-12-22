@@ -32,6 +32,11 @@ public:
     std::vector<double>  get_algorithm_tableWidget_input(const int& tab);
 
     void calculate_control(int count);
+
+    void reset_control_btns();
+
+    void update_relevance_tableWidget_input();
+private:
 private slots:
     void  slot_widgetCustomContextMenuRequested(const QPoint &pos);
 

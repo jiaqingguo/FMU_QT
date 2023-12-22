@@ -9,8 +9,9 @@ calculate_control_dialog::calculate_control_dialog(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->btn_pause->setCheckable(true);
-    ui->btn_pause->setEnabled(true);
-    ui->btn_stop->setEnabled(true);
+    ui->btn_pause->setEnabled(false);
+    ui->btn_stop->setEnabled(false);
+    ui->spinBox->setMinimum(1);
     connect(ui->btn_start, &QPushButton::clicked, this, &calculate_control_dialog::slot_btn_start);
     connect(ui->btn_pause, &QPushButton::clicked, this, &calculate_control_dialog::slot_btn_pause);
     connect(ui->btn_stop, &QPushButton::clicked, this, &calculate_control_dialog::slot_btn_stop);
@@ -20,6 +21,12 @@ calculate_control_dialog::calculate_control_dialog(QWidget *parent) :
 calculate_control_dialog::~calculate_control_dialog()
 {
     delete ui;
+}
+void calculate_control_dialog::reset_btns()
+{
+    ui->btn_start->setEnabled(true);
+    ui->btn_pause->setEnabled(false);
+    ui->btn_stop->setEnabled(false);
 }
 void calculate_control_dialog::slot_btn_start()
 {
@@ -49,6 +56,9 @@ void calculate_control_dialog::slot_btn_stop()
 {
     ui->btn_start->setEnabled(true);
     ui->btn_pause->setEnabled(false);
+    ui->btn_pause->setText(QString::fromLocal8Bit("ÔÝÍ£"));
+    ui->btn_pause->setChecked(false);
+    ui->btn_stop->setEnabled(false);
     emit signal_calculate_control(0, ui->spinBox->value());
     qDebug() << "slot_btn_stop()";
 }
