@@ -25,6 +25,7 @@ SOURCES += \
     fum_thread.cpp \
     main.cpp \
     operstionWidget.cpp \
+    thread_pool.cpp \
     widget.cpp
 
 HEADERS += \
@@ -35,6 +36,7 @@ HEADERS += \
     curveShowDialog.h \
     fum_thread.h \
     operstionWidget.h \
+    thread_pool.h \
     widget.h
 
 FORMS += \

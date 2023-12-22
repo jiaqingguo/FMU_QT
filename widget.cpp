@@ -9,6 +9,10 @@
 #include "widget.h"
 #include "ui_widget.h"
 #include "operstionWidget.h"
+#include "fum_thread.h"
+#include "thread_pool.h"
+
+Widget* g_pWidget = NULL;
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
@@ -34,11 +38,49 @@ Widget::Widget(QWidget *parent)
    // ui->tabWidget->setUserData(tabIndex, pData);
     connect(this,&Widget::customContextMenuRequested,this,&Widget::slot_widgetCustomContextMenuRequested);
     connect(ui->btn_calculate_control, &QPushButton::clicked, this, &Widget::slot_btn_calculate_control);
+
+    g_pWidget = this;
 }
 
 Widget::~Widget()
 {
     delete ui;
+}
+
+void Widget::update_algorithm_tableWidget_out(const int& tab, const std::vector<double>& vecOutputValue)
+{
+    QWidget* pWidget = ui->tabWidget->widget(tab);
+    operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
+    if (pOperstionWidget)
+    {
+        pOperstionWidget->update_tableWidget_out(vecOutputValue);
+    }
+}
+
+std::vector<double> Widget::get_algorithm_tableWidget_input(const int& tab)
+{
+    QWidget* pWidget = ui->tabWidget->widget(tab);
+    operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
+    if (pOperstionWidget)
+    {
+        return pOperstionWidget->get_tableWidgetInput();
+    }
+    return std::vector<double>();
+}
+
+void Widget::calculate_control(int count)
+{
+    for (int i = 0; i < 2; i++)
+    {
+        int count = ui->tabWidget->count();
+        for (int i = 0; i < count; i++)
+        {
+            QWidget* pWidget = ui->tabWidget->widget(i);
+            operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
+            pOperstionWidget->slot_btnCalculate();
+        }
+        qDebug() << "calculate_control()" << i;
+    }
 }
 
 void Widget::create_xml_configuration()
@@ -306,21 +348,6 @@ void Widget::initialize_configuration()
     m_iAlgorithmNum = 0;
 }
 
-//void Widget::slot_setRelevance(int srcAlgorithNum, int srcOutIndex, int dstSrcAlgorithNum, int dstInputIndex)
-//{
-//    int count = ui->tabWidget->count();
-//    for (int i = 0; i < count; i++)
-//    {
-//        QWidget* pWidget = ui->tabWidget->widget(i);
-//        operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
-//        
-//        if (pOperstionWidget->get_algorithm_num() == srcAlgorithNum)
-//        {
-//            pOperstionWidget->set_port_relevance(srcOutIndex, dstSrcAlgorithNum, dstInputIndex);
-//            break;
-//        }
-//    }
-//}
 
 void Widget::slot_update_prot_data(QMap<int, QMap<int, double>> mapNewData)
 {
@@ -334,6 +361,10 @@ void Widget::slot_update_prot_data(QMap<int, QMap<int, double>> mapNewData)
             QWidget* pWidget = ui->tabWidget->widget(i);
             operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
         
+            if (srcAlgorithNum == 4)
+            {
+                int a = 0;
+            }
             if (pOperstionWidget->get_algorithm_num() == srcAlgorithNum)
             {
                 auto newData = mapNewData[srcAlgorithNum];
@@ -354,24 +385,53 @@ void Widget::slot_btn_calculate_control()
     m_calculate_control_dialog->exec();
 }
 
-void Widget::slot_recv_calculate_control(int flag, int count/* = 0*/)
+void Widget::slot_recv_calculate_control(int flag, int calculate_count/* = 0*/)
 {
+
+    //for (int i = 0; i < m_iThreadCount; i++)
+    //{
+    //    int count = ui->tabWidget->count();
+    //    for (int i = 0; i < count; i++)
+    //    {
+    //        QWidget* pWidget = ui->tabWidget->widget(i);
+    //        operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
+    //        pOperstionWidget->slot_btnCalculate();
+
+    //    }
+
     if (flag == 1)
     {
-        for (int i = 0; i < m_iThreadCount; i++)
+        int thread_count = 0;
+        for (int iCycle = 0; iCycle < calculate_count; iCycle++)
         {
             int count = ui->tabWidget->count();
             for (int i = 0; i < count; i++)
             {
                 QWidget* pWidget = ui->tabWidget->widget(i);
                 operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
-                pOperstionWidget->slot_btnCalculate();
+               
+                fum_thread* pThread = new fum_thread;
+                pThread->set_fmu_file(pOperstionWidget->get_fmm_file_path());
+                
+                pThread->set_cur_tab(i);
+                pThread->set_thread_number(thread_count);
+                //pThread->set_input_value(pOperstionWidget->get_tableWidgetInput());
+                pThread->set_input_reference(pOperstionWidget->get_input_reference());
+                pThread->set_output_reference(pOperstionWidget->get_output_reference());
+                
 
+                m_pThread_pool->instance()->add_thread(pThread, thread_count);
 
-       
+                thread_count++;
+
             }
-            qDebug() << "slot_recv_calculate_control()" << i;
         }
+        
+        QWidget* pWidget = ui->tabWidget->widget(0);
+        operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
+        m_pThread_pool->instance()->start_thread(0, pOperstionWidget->get_tableWidgetInput());
+      
+
         
     }
     else

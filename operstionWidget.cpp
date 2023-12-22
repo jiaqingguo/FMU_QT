@@ -69,6 +69,75 @@ operstionWidget::~operstionWidget()
     m_mapAllOutputData.erase(m_iAlgorithmNum);
 }
 
+std::vector<double> operstionWidget::get_tableWidgetInput()
+{
+    std::vector<double> vecDoule;
+    for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
+    {
+        auto pItem = ui->tableWidget_input->item(1, i);
+        if (pItem)
+        {
+            vecDoule.push_back(pItem->text().toDouble());
+        }
+        else
+        {
+            vecDoule.push_back(0.0);
+        }
+    }
+    return vecDoule;
+}
+
+
+
+std::string operstionWidget::get_fmm_file_path()
+{
+    return m_fileInfo.absoluteFilePath().toStdString();
+}
+
+std::vector<fmi2ValueReference> operstionWidget::get_input_reference()
+{
+    return m_vecInputValueReference;
+}
+
+std::vector<fmi2ValueReference> operstionWidget::get_output_reference()
+{
+    return m_vecOutputValueReference;
+}
+
+void operstionWidget::get_input_data( std::vector<fmi2Real>& vecInputValue,  std::vector<fmi2ValueReference>& vecInputValueReference)
+{
+    for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
+    {
+        auto pItem = ui->tableWidget_input->item(1, i);
+        if (pItem)
+        {
+            vecInputValue.push_back(pItem->text().toDouble());
+        }
+        else
+        {
+            vecInputValue.push_back(0.0);
+        }
+    }
+    vecInputValueReference = m_vecInputValueReference;
+}
+
+void operstionWidget::update_tableWidget_out(const std::vector<double>& vecOutputValue)
+{
+    int count = ui->tableWidget_output->columnCount();
+    if (count < vecOutputValue.size())
+        return;
+   
+    for (int i = 0; i < ui->tableWidget_output->columnCount(); i++)
+    {
+        auto pItem = ui->tableWidget_output->item(1, i);
+        if (pItem)
+        {
+            pItem->setText(QString::number(vecOutputValue.at(i)));
+        }
+
+    }
+}
+
 std::string operstionWidget::string_To_UTF8(const std::string& str)
 {
     int nwLen = ::MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, NULL, 0);
@@ -701,21 +770,6 @@ void operstionWidget::get_relevacne_port_data()
          emit signal_update_port_data(mapNewData);
     }
    
-   /* for (const auto& dstAlgorithmDataData : m_mapRelevance)
-    {
-        for (auto& srcInputData: dstAlgorithmDataData)
-        {
-            int iInputIndx = srcInputData.first();
-            for (auto srcAlgorithmData : srcInputData)
-            {
-                if (srcAlgorithmData。 == m_iAlgorithmNum)
-                {
-
-                }
-            }
-        }
-       */
-    //}
 
 
 }
@@ -731,14 +785,6 @@ void operstionWidget::update_prot_data(QMap<int, double> portData)
         }
     }
 
-   /* for (int i = 0; i < portData.size(); i++)
-    {
-        auto pItem = ui->tableWidget_input->item(1, portData.key());
-        if (pItem)
-        {
-            pItem->setText(QString::number(portData[i]));
-        }
-    }*/
 }
 
 

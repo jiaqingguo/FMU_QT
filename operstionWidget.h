@@ -23,6 +23,13 @@ class operstionWidget : public QWidget
 public:
     explicit operstionWidget(const int num,QWidget *parent = nullptr);
     ~operstionWidget();
+    std::vector<double> get_tableWidgetInput();
+   // void set_tableWidgetOutput()
+    std::string  get_fmm_file_path();
+    std::vector<fmi2ValueReference> get_input_reference();
+    std::vector<fmi2ValueReference> get_output_reference();
+    void get_input_data( std::vector<fmi2Real>& vecInputValue,  std::vector<fmi2ValueReference>& vecInputValueReference);
+    void update_tableWidget_out(const std::vector<double>& vecOutputValue);
 
     std::string string_To_UTF8(const std::string& str);
     bool modifyFileFormat(const QString &strFliePath,const QString &strSavePath);

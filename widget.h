@@ -4,10 +4,14 @@
 #include <QWidget>
 #include <QMap>
 #include "calculate_control_dialog.h"
+//
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
 QT_END_NAMESPACE
+
+class thread_pool;
 
 class Widget : public QWidget
 {
@@ -22,6 +26,12 @@ public:
     {
         int iAlgorithmNum;
     };
+
+
+    void update_algorithm_tableWidget_out(const int& tab, const  std::vector<double> & vecOutputValue);
+    std::vector<double>  get_algorithm_tableWidget_input(const int& tab);
+
+    void calculate_control(int count);
 private slots:
     void  slot_widgetCustomContextMenuRequested(const QPoint &pos);
 
@@ -37,7 +47,7 @@ private slots:
 
     void slot_btn_calculate_control();
 
-    void slot_recv_calculate_control(int flag,int count/* = 0*/);
+    void slot_recv_calculate_control(int flag,int calculate_count/* = 0*/);
 
     
 private:
@@ -45,5 +55,10 @@ private:
     int m_iAlgorithmNum=0;
     calculate_control_dialog* m_calculate_control_dialog;
     int m_iThreadCount = 10;
+
+
+    thread_pool* m_pThread_pool;			// 线程池对象
 };
+
+extern Widget* g_pWidget;
 #endif // WIDGET_H
