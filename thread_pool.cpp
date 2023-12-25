@@ -138,6 +138,11 @@ void thread_pool::run_contral(const int& flags)
 
 }
 
+int thread_pool::get_thread_size()
+{
+	return m_mapThread.size();
+}
+
 
 void thread_pool::slot_thread_finished()
 {

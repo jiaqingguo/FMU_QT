@@ -49,7 +49,7 @@ void calculate_control_dialog::slot_btn_pause(bool checked)
         ui->btn_pause->setText(QString::fromLocal8Bit("ÔÝÍ£"));
         emit signal_calculate_control(3, ui->spinBox->value());
     }
-    qDebug() << "slot_btn_pause()";
+    //qDebug() << "slot_btn_pause()";
    
 }
 
@@ -61,5 +61,5 @@ void calculate_control_dialog::slot_btn_stop()
     ui->btn_pause->setChecked(false);
     ui->btn_stop->setEnabled(false);
     emit signal_calculate_control(0, ui->spinBox->value());
-    qDebug() << "slot_btn_stop()";
+    //qDebug() << "slot_btn_stop()";
 }

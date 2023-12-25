@@ -30,6 +30,8 @@ public:
 
 	void run_contral(const int &flags);
 
+	int get_thread_size();
+
 signals:
 	void signal_fmu_thread_finished(int tab, const  std::vector<double> vecOutputValue);
 private slots:

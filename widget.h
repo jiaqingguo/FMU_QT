@@ -38,7 +38,7 @@ public:
 
     void reset_control_btns();
 
-    void update_relevance_tableWidget_input(const int & tab,const QVector<double>& outputValue);
+   // void update_relevance_tableWidget_input(const int & tab,const QVector<double>& outputValue);
 private:
 private slots:
     void slot_widgetCustomContextMenuRequested(const QPoint &pos);

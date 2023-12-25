@@ -80,7 +80,7 @@ void Widget::update_algorithhnum_opersition(const int& tab, const std::vector<do
 
         // 更新拍数 数据传递
 
-        // 更新关联端口
+        // 更新关联端口;
         pOperstionWidget->combine_relevacne_port_data(vecOutputValue);
     }
 }
@@ -116,16 +116,16 @@ void Widget::reset_control_btns()
     m_calculate_control_dialog->reset_btns();
 }
 
-void Widget::update_relevance_tableWidget_input(const int& tab, const QVector<double>& outputValue)
-{
-    QWidget* pWidget = ui->tabWidget->widget(tab);
-    operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
-    if (pOperstionWidget)
-    {
-      // pOperstionWidget->combine_relevacne_port_data(outputValue);
-    }
-
-}
+//void Widget::update_relevance_tableWidget_input(const int& tab, const QVector<double>& outputValue)
+//{
+//    QWidget* pWidget = ui->tabWidget->widget(tab);
+//    operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
+//    if (pOperstionWidget)
+//    {
+//       //pOperstionWidget->combine_relevacne_port_data(outputValue);
+//    }
+//
+//}
 
 
 
@@ -143,8 +143,6 @@ void Widget::create_xml_configuration()
         return ;
     }
    
-   // QString str_xml_path = QCoreApplication::applicationDirPath() + "/" + "configuration.xml";
-    //QString strNameTemp = Win0rLinuxFilePath(strName);
     QFile file(str_xml_path);
 
     bool ret = file.open(QIODevice::WriteOnly | QIODevice::Truncate);
@@ -179,87 +177,6 @@ void Widget::create_xml_configuration()
     //添加根元素
     doc.appendChild(root);
 
-
-    ////添加第一个book元素及其子元素
-    //QDomElement AlgorithmNum = doc.createElement(tr("AlgorithmNum"));
-    //QDomAttr num = doc.createAttribute(tr("num"));
-    //QDomAttr filePath = doc.createAttribute(tr("filePath"));
-
-    //int iAlgorithmNum = 1;
-    //num.setValue(QString::number(iAlgorithmNum));
-    //filePath.setValue(m_fileInfo.filePath());
-
-    //AlgorithmNum.setAttributeNode(filePath);
-    //AlgorithmNum.setAttributeNode(num);
-
-
-    //// 输入端口相关数据
-    //if (m_vecInputPort.size() > 0)
-    //{
-    //    for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
-    //    {
-    //        QDomElement elment_input = doc.createElement(tr("input"));
-
-    //        // 属性;
-    //        QDomAttr name = doc.createAttribute(tr("name"));
-    //        QDomAttr valueReference = doc.createAttribute(tr("valueReference"));
-    //        QDomAttr value = doc.createAttribute(tr("value"));
-
-    //        name.setValue(m_vecInputPort.at(i));
-    //        valueReference.setValue(QString::number(m_vecInputValueReference.at(i)));
-    //        auto pItem = ui->tableWidget_input->item(1, i);
-    //        if (pItem)
-    //        {
-    //            value.setValue(pItem->text());
-    //        }
-    //        else
-    //        {
-    //            value.setValue(QString::number(0.0));
-    //        }
-
-    //        elment_input.setAttributeNode(value);
-    //        elment_input.setAttributeNode(valueReference);
-    //        elment_input.setAttributeNode(name);
-
-
-    //        AlgorithmNum.appendChild(elment_input);
-    //    }
-    //}
-    //else
-    //{
-    //    //QMessageBox::critical(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("!"));
-    //    qDebug() << iAlgorithmNum << " 输入端口数量为0，此算法不保存配置！";
-    //    return false;
-    //}
-
-    //// 输出端口相关数据;
-    //const auto& vecOutputData = m_mapOutputPort[m_iAlgorithmNum];
-    //if (vecOutputData.size() > 0)
-    //{
-    //    for (int i = 0; i < vecOutputData.size(); i++)
-    //    {
-    //        QDomElement elment_output = doc.createElement(tr("output"));
-
-    //        // 属性;
-    //        QDomAttr name = doc.createAttribute(tr("name"));
-    //        QDomAttr valueReference = doc.createAttribute(tr("valueReference"));
-
-
-    //        name.setValue(vecOutputData.at(i));
-    //        valueReference.setValue(QString::number(m_vecOutputValueReference.at(i)));
-
-    //        elment_output.setAttributeNode(valueReference);
-    //        elment_output.setAttributeNode(name);
-
-
-    //        AlgorithmNum.appendChild(elment_output);
-    //    }
-    //}
-    //else
-    //{
-    //    qDebug() << iAlgorithmNum << " 输出端口数量为0，此算法不保存配置！";
-    //    return false;
-    //}
     QTextStream out(&file);
     doc.save(out, 4);
     file.close();
@@ -429,22 +346,36 @@ void Widget::slot_update_prot_data(QMap<int, QMap<int, double>> mapNewData)
 void Widget::slot_btn_calculate_control()
 {
     m_calculate_control_dialog->exec();
+
+    if (m_pThread_pool->instance()->get_thread_size() > 0)
+    {
+        QMessageBox msgBox;
+        msgBox.setText(QString::fromLocal8Bit("提示"));
+        msgBox.setInformativeText(QString::fromLocal8Bit("确认退出,终止计算?"));
+        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        // 将原本显示“Yes”的按钮改为显示“是”
+        msgBox.button(QMessageBox::Ok)->setText(QString::fromLocal8Bit("确定"));
+        // 将原本显示“No”的按钮改为显示“否”
+        msgBox.button(QMessageBox::Cancel)->setText(QString::fromLocal8Bit("取消"));
+       
+        int ret = msgBox.exec();
+        if (ret == QMessageBox::Ok) 
+        {
+            //若用户点击确认，结束线程池;
+            m_calculate_control_dialog->slot_btn_stop();
+        }
+        else 
+        {
+            //若用户点击取消，
+            m_calculate_control_dialog->exec();
+        }
+    }
+    
 }
 
 void Widget::slot_recv_calculate_control(int flag, int calculate_count/* = 0*/)
 {
-
-    //for (int i = 0; i < m_iThreadCount; i++)
-    //{
-    //    int count = ui->tabWidget->count();
-    //    for (int i = 0; i < count; i++)
-    //    {
-    //        QWidget* pWidget = ui->tabWidget->widget(i);
-    //        operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
-    //        pOperstionWidget->slot_btnCalculate();
-
-    //    }
-
     if (flag == 1)
     {
         int thread_count = 0;

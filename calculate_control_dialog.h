@@ -18,13 +18,14 @@ public:
     void reset_btns();
 signals:
     void signal_calculate_control(int flag,int count/* =0*/);
-private slots:
+public slots:
     void slot_btn_start();
     void slot_btn_pause(bool checked);
     void slot_btn_stop();
 
 private:
     Ui::calculate_control_dialog *ui;
+
 };
 
 #endif // CALCULATE_CONTROL_DIALOG_H
