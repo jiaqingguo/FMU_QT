@@ -69,6 +69,22 @@ void Widget::update_algorithm_tableWidget_out(const int& tab, const std::vector<
     }
 }
 
+void Widget::update_algorithhnum_opersition(const int& tab, const std::vector<double>& vecOutputValue)
+{
+    QWidget* pWidget = ui->tabWidget->widget(tab);
+    operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
+    if (pOperstionWidget)
+    {
+        // 更新输出显示;
+        pOperstionWidget->update_tableWidget_out(vecOutputValue);
+
+        // 更新拍数 数据传递
+
+        // 更新关联端口
+        pOperstionWidget->combine_relevacne_port_data(vecOutputValue);
+    }
+}
+
 std::vector<double> Widget::get_algorithm_tableWidget_input(const int& tab)
 {
     QWidget* pWidget = ui->tabWidget->widget(tab);
@@ -99,6 +115,19 @@ void Widget::reset_control_btns()
 {
     m_calculate_control_dialog->reset_btns();
 }
+
+void Widget::update_relevance_tableWidget_input(const int& tab, const QVector<double>& outputValue)
+{
+    QWidget* pWidget = ui->tabWidget->widget(tab);
+    operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
+    if (pOperstionWidget)
+    {
+      // pOperstionWidget->combine_relevacne_port_data(outputValue);
+    }
+
+}
+
+
 
 void Widget::create_xml_configuration()
 {

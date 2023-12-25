@@ -29,16 +29,19 @@ public:
 
     
     void update_algorithm_tableWidget_out(const int& tab, const  std::vector<double> & vecOutputValue);
+
+
+    void update_algorithhnum_opersition(const int& tab, const  std::vector<double>& vecOutputValue);
     std::vector<double>  get_algorithm_tableWidget_input(const int& tab);
 
     void calculate_control(int count);
 
     void reset_control_btns();
 
-    void update_relevance_tableWidget_input();
+    void update_relevance_tableWidget_input(const int & tab,const QVector<double>& outputValue);
 private:
 private slots:
-    void  slot_widgetCustomContextMenuRequested(const QPoint &pos);
+    void slot_widgetCustomContextMenuRequested(const QPoint &pos);
 
     void create_xml_configuration();
 

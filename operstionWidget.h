@@ -48,14 +48,15 @@ public:
     //void set_port_relevance(int srcOutIndex, int dstSrcAlgorithNum, int dstInputIndex);
     // 更新端口关联数据;
     void update_prot_data(QMap<int, double> portData);
+    //获得关联端口数据;
+     void get_relevacne_port_data();
+    void combine_relevacne_port_data(const std::vector<double> vecOutputValue);
 private:
 
     void load_tableWidget_show();
     void use_fmu_caculate();
 
-    //获得关联端口数据;
-    void get_relevacne_port_data();
-
+   
 signals:
     // 端口关联信号;
    // void signal_port_relevance(int srcAlgorithNum, int srcOutIndex, int dstSrcAlgorithNum, int dstInputIndex);

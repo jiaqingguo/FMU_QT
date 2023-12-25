@@ -150,9 +150,10 @@ void thread_pool::slot_thread_finished()
 		
 		int tab = pThread->get_cur_tab();
 		
-		g_pWidget->update_algorithm_tableWidget_out(tab, vecOutputData);
+		g_pWidget->update_algorithhnum_opersition(tab, vecOutputData);
 		//emit signal_fmu_thread_finished(tab, vecOutputData);
-		
+		// 1.2 数据及拍数；
+
 
 
 		qDebug() << "thread " << pThread->get_thread_number() << "end------!";
@@ -182,6 +183,9 @@ void thread_pool::slot_thread_finished()
 		{
 			start_next_thread();
 		}
+
+
+
 	/*	else if(m_control_flags==)
 		{
 

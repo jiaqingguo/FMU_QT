@@ -127,7 +127,7 @@ void operstionWidget::update_tableWidget_out(const std::vector<double>& vecOutpu
     if (count < vecOutputValue.size())
         return;
    
-    for (int i = 0; i < ui->tableWidget_output->columnCount(); i++)
+   /* for (int i = 0; i < ui->tableWidget_output->columnCount(); i++)
     {
         auto pItem = ui->tableWidget_output->item(1, i);
         if (pItem)
@@ -135,7 +135,14 @@ void operstionWidget::update_tableWidget_out(const std::vector<double>& vecOutpu
             pItem->setText(QString::number(vecOutputValue.at(i)));
         }
 
-    }
+    }*/
+
+    m_iCalculateCount++;
+    m_mapAllOutputData[m_iAlgorithmNum][m_iCalculateCount] = vecOutputValue;
+
+    ui->comboBox_countShow->addItem(QString::number(m_iCalculateCount));
+    int index = m_iCalculateCount - 1;
+    ui->comboBox_countShow->setCurrentIndex(index);
 }
 
 std::string operstionWidget::string_To_UTF8(const std::string& str)
@@ -318,7 +325,7 @@ bool operstionWidget::readXML(const QString strXmlPath)
         //3、解析XML
         //获取XML根结点
 
-        QDomElement root= doc.documentElement();//class结点
+        QDomElement root= doc.documentElement(); //class结点
         //遍历每个student结点
         QDomNodeList nodeList=root.elementsByTagName("ScalarVariable");//通过标签名获取结点列表
 
@@ -769,9 +776,44 @@ void operstionWidget::get_relevacne_port_data()
     {
          emit signal_update_port_data(mapNewData);
     }
-   
+}
 
+void operstionWidget::combine_relevacne_port_data(const std::vector<double> vecNewData)
+{
+    //auto vecNewData = m_mapAllOutputData[m_iAlgorithmNum][m_iCalculateCount];
+    // <算法，端口，要更新的值>
+    QMap<int, QMap<int, double>> mapNewData;
+    // QMap<int, QMap<int, QMap<int, int>>>
+    for (auto groupIt = m_mapRelevance.begin(); groupIt != m_mapRelevance.end(); ++groupIt)
+    {
+        int recvAlgorithNum = groupIt.key();
 
+        // 内层循环遍历第二层键值对
+        for (auto input_itor = groupIt.value().begin(); input_itor != groupIt.value().end(); ++input_itor)
+        {
+            int recvInput = input_itor.key();
+            int i = 0;
+            for (auto dstNumIt = input_itor.value().begin(); dstNumIt != input_itor.value().end(); ++dstNumIt)
+            {
+                int sendAlgorithmNum = dstNumIt.key();
+                if (sendAlgorithmNum == m_iAlgorithmNum)
+                {
+
+                    // 获取端口的值;
+                    auto sendPortIndex = dstNumIt.value();
+                    double value = vecNewData[sendPortIndex];
+                    mapNewData[recvAlgorithNum][recvInput] = value;
+                    break;
+                }
+                i++;
+            }
+
+        }
+    }
+    if (mapNewData.size() > 0)
+    {
+        emit signal_update_port_data(mapNewData);
+    }
 }
 
 void operstionWidget::update_prot_data(QMap<int, double> portData)
@@ -1003,7 +1045,6 @@ void operstionWidget::slot_btnClear()
         {
             pItem->setText("");
         }
-
     }
 }
 
