@@ -299,6 +299,19 @@ bool operstionWidget::deleteDir(const QString strDirPath)
 
 }
 
+bool operstionWidget::is_file_exist(const QString fullFileName)
+{
+   
+    QFileInfo fileInfo(fullFileName);
+    if (fileInfo.isFile())
+    {
+        return true;
+    }
+    
+    return false;
+        
+}
+
 bool operstionWidget::readXML(const QString strXmlPath)
 {
     //1、创建QFile对象，指定要打开的XML文件
@@ -955,75 +968,16 @@ void operstionWidget::slot_btnCalculate()
         QMessageBox::critical(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("输入输出端口不正常,无法计算!"));
         return;
     }
-
+    if (!(is_file_exist(m_fileInfo.absoluteFilePath())))
+    {
+        QMessageBox::critical(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("fmu文件不存在,无法计算!"));
+        return;
+    }
     m_iCalculateCount++;
 
     std::thread thread_(&operstionWidget::use_fmu_caculate, this);
     thread_.join();
    
-    ////传入输出；
-    //std::vector<double> vecDoule;
-    //for(int i=0;i<ui->tableWidget_input->columnCount();i++)
-    //{
-    //  auto pItem = ui->tableWidget_input->item(1,i);
-    //  if(pItem)
-    //  {
-    //      vecDoule.push_back(pItem->text().toDouble());
-    //  }
-    //  else
-    //  {
-    //      vecDoule.push_back(0.0);
-    //  }
-    //}
-
-    //// 传给算法;
-    ////std::string exe_config_paths = "D:\\CS\\atspaceMicroTimer.fmu";//m_fileInfo.filePath().toStdString();
-    //std::string exe_config_paths = m_fileInfo.absoluteFilePath().toStdString();
-    //const std::string fmu_path = string_To_UTF8(exe_config_paths);
-    //fmi2::fmu fmu(fmu_path);
-    //auto cs_fmu = fmu.as_cs_fmu();
-    //auto md = cs_fmu->get_model_description();
-    //auto slave1 = cs_fmu->new_instance();
-    //slave1->setup_experiment();
-    //slave1->enter_initialization_mode();
-    //slave1->exit_initialization_mode();
-
-
-    //std::vector<fmi2Real> wef(m_vecInputValueReference.size());
-    //std::vector<fmi2Real> ref(m_vecOutputValueReference.size());
-   
-
-    //for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
-    //{
-    //    auto pItem = ui->tableWidget_input->item(1, i);
-    //    if (pItem)
-    //    {
-    //        wef[i]=pItem->text().toDouble();
-    //    }
-    //    else
-    //    {
-    //        wef[i] = 0.0;
-    //    }
-    //}
-
-
-    //if (!slave1->write_real(m_vecInputValueReference, wef))
-    //{
-    //    return;
-    //}
-   
-    //if (!slave1->step(stepSize))
-    //{
-    //    return;
-    //}
-    //
-    //if (!slave1->read_real(m_vecOutputValueReference, ref))
-    //{
-    //    return;
-    //}
-   
-    //// 接受算法输出进行显示;
-    //m_mapAllOutputData[m_iAlgorithmNum][m_iCalculateCount] = ref;
 
     ui->comboBox_countShow->addItem(QString::number(m_iCalculateCount));
     int index = m_iCalculateCount - 1;

@@ -37,6 +37,7 @@ public:
     bool createFolder(const QString &folderPath);
     bool deleteFile(const QString strFilePath);
     bool deleteDir(const QString strDirPath);
+    bool is_file_exist(const QString str);
     bool readXML(const QString strXmlPath);
 
     bool create_xml_configuration(QFile& file, QDomDocument& doc, QDomElement& root);

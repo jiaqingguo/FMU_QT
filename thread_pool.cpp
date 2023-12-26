@@ -160,10 +160,6 @@ void thread_pool::slot_thread_finished()
 		// 1.2 数据及拍数；
 
 
-
-		qDebug() << "thread " << pThread->get_thread_number() << "end------!";
-
-
 		int number = pThread->get_thread_number();
 
 		m_next_thread_num = pThread->get_thread_number() + 1;

@@ -1,3 +1,6 @@
+#include <QFileInfo>
+#include <QDebug>
+
 #include "fum_thread.h"
 
 using namespace fmi4cpp;
@@ -66,12 +69,6 @@ std::vector<fmi2Real> fum_thread::get_output_data()
 }
 
 
-
-//std::vector<fmi2Real> get_output_data()
-//{
-//   // return m_vecOutputValue;
-//}
-
 void fum_thread::run()
 {
     if (m_str_fmu_file_path.length() <= 0)
@@ -81,45 +78,46 @@ void fum_thread::run()
     if (m_vecInputValue.size() <= 0 || m_vecInputValueReference.size() <= 0 || m_vecOutputValueReference.size() <= 0)
         return;
 
+    QFileInfo fileInfo(QString::fromStdString(m_str_fmu_file_path));
+    if (!fileInfo.isFile())
+    {
+        qDebug() << QString::fromStdString(m_str_fmu_file_path) << " not exist!!!!";
+        return;
+    }
+
+    
     // ´«¸øËã·¨;
-    //std::string exe_config_paths = "D:\\CS\\atspaceMicroTimer.fmu";//m_fileInfo.filePath().toStdString();
-    //std::string exe_config_paths = m_fileInfo.absoluteFilePath().toStdString();
-    //const std::string fmu_path = string_To_UTF8(exe_config_paths);
-  /*  while (m_bRun)
-    {*/
-        fmi2::fmu fmu(m_str_fmu_file_path);
-        auto cs_fmu = fmu.as_cs_fmu();
-        auto md = cs_fmu->get_model_description();
-        auto slave1 = cs_fmu->new_instance();
-        slave1->setup_experiment();
-        slave1->enter_initialization_mode();
-        slave1->exit_initialization_mode();
+
+    fmi2::fmu fmu(m_str_fmu_file_path);
+    auto cs_fmu = fmu.as_cs_fmu();
+    auto md = cs_fmu->get_model_description();
+    auto slave1 = cs_fmu->new_instance();
+    slave1->setup_experiment();
+    slave1->enter_initialization_mode();
+    slave1->exit_initialization_mode();
 
 
-        //std::vector<fmi2Real> wef(m_vecInputValueReference.size());
-        //std::vector<fmi2Real> ref(m_vecOutputValueReference.size());
-        m_vecOutputValue.resize(m_vecOutputValueReference.size());
+    //std::vector<fmi2Real> wef(m_vecInputValueReference.size());
+    //std::vector<fmi2Real> ref(m_vecOutputValueReference.size());
+    m_vecOutputValue.resize(m_vecOutputValueReference.size());
 
         
 
-        if (!slave1->write_real(m_vecInputValueReference, m_vecInputValue))
-        {
-            //return;
-        }
-
-        if (!slave1->step(1))
-        {
-            //return;
-        }
-
-        if (!slave1->read_real(m_vecOutputValueReference, m_vecOutputValue))
-        {
-            //return;
-        }
-          
-  /*      m_bRun = false;
+    if (!slave1->write_real(m_vecInputValueReference, m_vecInputValue))
+    {
+        //return;
     }
-   */
+
+    if (!slave1->step(1))
+    {
+        //return;
+    }
+
+    if (!slave1->read_real(m_vecOutputValueReference, m_vecOutputValue))
+    {
+        //return;
+    }
+          
 
 }
 
