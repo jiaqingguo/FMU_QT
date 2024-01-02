@@ -63,7 +63,13 @@
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>150</height>
+       <height>180</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>16777215</height>
       </size>
      </property>
      <property name="title">
@@ -98,13 +104,32 @@
        </layout>
       </item>
       <item>
-       <widget class="QTableWidget" name="tableWidget_input"/>
+       <widget class="QTableWidget" name="tableWidget_input">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>70</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
    </item>
    <item>
     <widget class="QGroupBox" name="groupBox_output">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>180</height>
+      </size>
+     </property>
      <property name="title">
       <string>输出</string>
      </property>
@@ -155,7 +180,14 @@
        </layout>
       </item>
       <item>
-       <widget class="QTableWidget" name="tableWidget_output"/>
+       <widget class="QTableWidget" name="tableWidget_output">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>70</height>
+         </size>
+        </property>
+       </widget>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">

@@ -58,8 +58,10 @@ curveShowDialog::~curveShowDialog()
     delete ui;
 }
 
-void curveShowDialog::setCurveSHowData(const int paiNum,const QMap<int, QVector<double> > mapData)
+void curveShowDialog::setCurveSHowData(const QString& title, const int paiNum,const QMap<int, QVector<double> > mapData)
 {
+    clear_show();
+    m_pChart->setTitle(title);
 
     // 确定x轴 y轴的最大值最小值;
 
@@ -102,4 +104,9 @@ void curveShowDialog::setCurveSHowData(const int paiNum,const QMap<int, QVector<
        m_pChart->setAxisY(m_pAxisY,ser);
 
     }
+}
+
+void curveShowDialog::clear_show()
+{
+    m_pChart->removeAllSeries();
 }

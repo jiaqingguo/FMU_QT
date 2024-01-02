@@ -10,6 +10,7 @@
 #include "ui_operstionWidget.h"
 #include "addValueDialog.h"
 #include "curveShowDialog.h"
+#include "widget.h"
 
 using namespace fmi4cpp;
 const double stepSize = 1;
@@ -27,7 +28,7 @@ operstionWidget::operstionWidget(const int num,QWidget *parent) :m_iAlgorithmNum
     ui(new Ui::operstionWidget)
 {
     ui->setupUi(this);
-
+  
     ui->tableWidget_input->setRowCount(2);
     ui->tableWidget_input->setVerticalHeaderLabels(QStringList() << QStringLiteral("端口 ") << QStringLiteral("数值 "));
     ui->tableWidget_input->horizontalHeader()->setHidden(true);
@@ -127,6 +128,7 @@ void operstionWidget::update_tableWidget_out(const std::vector<double>& vecOutpu
     if (count < vecOutputValue.size())
         return;
    
+    // 下面切换拍数 实际会更新Item数值;
    /* for (int i = 0; i < ui->tableWidget_output->columnCount(); i++)
     {
         auto pItem = ui->tableWidget_output->item(1, i);
@@ -667,7 +669,7 @@ void operstionWidget::load_tableWidget_show()
 
    // ui->tableWidget_output->clearContents();
     //ui->tableWidget_output->setColumnCount(m_mapOutputPort[m_iAlgorithmNum].size());
-
+    disconnect(ui->tableWidget_output, SIGNAL(cellChanged(int, int)), this, SLOT(slot_tableWigdetCheckedChanged(int, int)));
     for (int i = 0; i < ui->tableWidget_output->columnCount(); i++)
     {
         QTableWidgetItem* pItemPort = new QTableWidgetItem(m_mapOutputPort[m_iAlgorithmNum].at(i));
@@ -678,6 +680,8 @@ void operstionWidget::load_tableWidget_show()
         ui->tableWidget_output->setItem(1, i, pItemValue);
 
     }
+    m_setOutputIndex.clear();
+    connect(ui->tableWidget_output, SIGNAL(cellChanged(int, int)), this, SLOT(slot_tableWigdetCheckedChanged(int, int)));
 
    
 }
@@ -829,6 +833,38 @@ void operstionWidget::combine_relevacne_port_data(const std::vector<double> vecN
     }
 }
 
+bool operstionWidget::is_curve_show_dialog()
+{
+    if (g_pWidget->get_curve_ptr())
+    {
+        return g_pWidget->get_curve_ptr()->isVisible();
+    }
+    return false;
+}
+
+void operstionWidget::update_curve_show_dialog()
+{
+    if (g_pWidget->get_curve_ptr() == nullptr)
+        return;
+   
+        const auto& mapData = m_mapAllOutputData[m_iAlgorithmNum];
+
+        QMap<int, QVector<double>> mapShowData;
+        for (const auto& outIndex : m_setOutputIndex)
+        {
+            for (auto& vecPaidata : mapData)
+            {
+                mapShowData[outIndex].append(vecPaidata.second.at(outIndex));
+            }
+        }
+
+        QString title = QString::fromLocal8Bit("算法") + QString::number(m_iAlgorithmNum);
+        g_pWidget->get_curve_ptr()->setCurveSHowData(title,m_iCalculateCount, mapShowData);
+        g_pWidget->get_curve_ptr()->resize(1000, 900);
+       
+        g_pWidget->get_curve_ptr()->show();
+}
+
 void operstionWidget::update_prot_data(QMap<int, double> portData)
 {
     for (auto groupIt = portData.begin(); groupIt != portData.end(); ++groupIt)
@@ -883,18 +919,39 @@ void operstionWidget::slot_btnChooseFile()
 
 void operstionWidget::slot_tableWigdetCheckedChanged(int row, int col)
 {
-    //qDebug()<<"slot_tableWigdetCheckedChanged"<<row<<col;
-    //auto pItem = ui->tableWidget_output->item(row,col);
-    //if(pItem==nullptr)
-    //    return;
-    //if(pItem->checkState() == Qt::Checked)
-    //{
-    //    m_setOutputIndex.insert(col);
-    //}
-    //else
-    //{
-    //    m_setOutputIndex.remove(col);
-    //}
+    if (row != 0)
+        return;
+    if (g_pWidget->get_curve_ptr()->isVisible())
+    {
+        qDebug() << "slot_tableWigdetCheckedChanged" << row << col;
+
+
+        auto pItem = ui->tableWidget_output->item(row, col);
+        if (pItem == nullptr)
+            return;
+        if (pItem->checkState() == Qt::Checked)
+        {
+            m_setOutputIndex.insert(col);
+        }
+        else
+        {
+            m_setOutputIndex.remove(col);
+        }
+       
+        const auto& mapData = m_mapAllOutputData[m_iAlgorithmNum];
+
+        QMap<int, QVector<double>> mapShowData;
+        for (const auto& outIndex : m_setOutputIndex)
+        {
+            for (auto& vecPaidata : mapData)
+            {
+                mapShowData[outIndex].append(vecPaidata.second.at(outIndex));
+            }
+        }
+        QString title = QString::fromLocal8Bit("算法") + QString::number(m_iAlgorithmNum);
+        g_pWidget->get_curve_ptr()->setCurveSHowData(title,m_iCalculateCount, mapShowData);
+    }
+   
 }
 
 void operstionWidget::slot_btn_clear_input()
@@ -1024,7 +1081,7 @@ void operstionWidget::slot_btnCurveShow()
     if(m_setOutputIndex.isEmpty())
     {
         QMessageBox::critical(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("请先勾选要显示的输出位!"));
-        return;
+       return;
     }
     const auto &mapData=m_mapAllOutputData[m_iAlgorithmNum];
 
@@ -1036,10 +1093,11 @@ void operstionWidget::slot_btnCurveShow()
             mapShowData[outIndex].append(vecPaidata.second.at(outIndex));
         }
     }
-    curveShowDialog dialog;
-    dialog.setCurveSHowData(m_iCalculateCount,mapShowData);
-    dialog.resize(1000, 900);
-    dialog.exec();
+    QString title = QString::fromLocal8Bit("算法") + QString::number(m_iAlgorithmNum);
+    g_pWidget->get_curve_ptr()->setCurveSHowData(title,m_iCalculateCount,mapShowData);
+    g_pWidget->get_curve_ptr()->resize(1000, 900);
+   
+    g_pWidget->get_curve_ptr()->show();
 
 }
 

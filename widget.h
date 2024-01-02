@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QMap>
 #include "calculate_control_dialog.h"
+#include "curveShowDialog.h"
 //
 
 
@@ -20,16 +21,8 @@ class Widget : public QWidget
 public:
     Widget(QWidget *parent = nullptr);
     ~Widget();
-
-
-    struct myUseData :QObjectUserData 
-    {
-        int iAlgorithmNum;
-    };
-
     
     void update_algorithm_tableWidget_out(const int& tab, const  std::vector<double> & vecOutputValue);
-
 
     void update_algorithhnum_opersition(const int& tab, const  std::vector<double>& vecOutputValue);
     std::vector<double>  get_algorithm_tableWidget_input(const int& tab);
@@ -38,8 +31,9 @@ public:
 
     void reset_control_btns();
 
-   // void update_relevance_tableWidget_input(const int & tab,const QVector<double>& outputValue);
-private:
+    curveShowDialog* get_curve_ptr();
+protected:
+    void closeEvent(QCloseEvent* event);
 private slots:
     void slot_widgetCustomContextMenuRequested(const QPoint &pos);
 
@@ -49,24 +43,24 @@ private slots:
 
     void initialize_configuration();
 
-   // void slot_setRelevance(int srcAlgorithNum, int srcOutIndex, int dstSrcAlgorithNum, int dstInputIndex);
-
     void slot_update_prot_data(QMap<int, QMap<int, double>> mapNewData);
 
     void slot_btn_calculate_control();
 
     void slot_recv_calculate_control(int flag,int calculate_count/* = 0*/);
 
-    void slot_thread_finished();					// 释放线程
     void slot_fmu_thread_finished(int tab, const  std::vector<double> vecOutputValue);
+
+    void slot_tab_changed(int index);
 private:
     Ui::Widget *ui;
     int m_iAlgorithmNum=0;
     calculate_control_dialog* m_calculate_control_dialog;
     int m_iThreadCount = 10;
 
-
     thread_pool* m_pThread_pool;			// 线程池对象
+
+    curveShowDialog* m_curve_show_dialog = nullptr;
 };
 
 extern Widget* g_pWidget;

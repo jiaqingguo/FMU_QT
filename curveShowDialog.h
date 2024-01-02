@@ -20,7 +20,11 @@ public:
     explicit curveShowDialog(QWidget *parent = nullptr);
     ~curveShowDialog();
 
-    void setCurveSHowData(const int paiNum,const QMap<int,QVector<double>> mapData);
+    void setCurveSHowData(const QString& title, const int paiNum,const QMap<int,QVector<double>> mapData);
+
+    void clear_show();
+
+  
 private:
     Ui::curveShowDialog *ui;
     QtCharts::QChart *m_pChart;

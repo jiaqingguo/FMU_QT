@@ -16,6 +16,8 @@ namespace Ui {
 class operstionWidget;
 }
 
+class curveShowDialog;
+
 class operstionWidget : public QWidget
 {
     Q_OBJECT
@@ -52,6 +54,9 @@ public:
     //获得关联端口数据;
      void get_relevacne_port_data();
     void combine_relevacne_port_data(const std::vector<double> vecOutputValue);
+
+    bool is_curve_show_dialog();
+    void update_curve_show_dialog();
 private:
 
     void load_tableWidget_show();
@@ -78,6 +83,7 @@ private slots:
     void slot_tableWidgetCellEntered(int row, int column);
 private:
     Ui::operstionWidget *ui;
+    //curveShowDialog* m_curveShowDialog = nullptr;
     int m_iAlgorithmNum=0;// 算法顺序数;
     QFileInfo m_fileInfo;
     QVector<QString> m_vecInputPort;   // 输入端口;

@@ -2,6 +2,8 @@
 #include <QDomDocument>
 #include <QTextStream>
 #include <QFileDialog>
+#include <QTabBar>
+
 #include <qdebug.h>
 
 #include <qmessagebox.h>
@@ -41,6 +43,9 @@ Widget::Widget(QWidget *parent)
 
     connect(m_pThread_pool->instance(), &thread_pool::signal_fmu_thread_finished, this, &Widget::slot_fmu_thread_finished);
 
+    connect(ui->tabWidget->tabBar(), &QTabBar::currentChanged, this, &Widget::slot_tab_changed);
+
+    m_curve_show_dialog = new curveShowDialog();
     g_pWidget = this;
 }
 
@@ -49,14 +54,25 @@ Widget::~Widget()
     delete ui;
 }
 
-void Widget::slot_thread_finished()
-{
-    
-}
 
 void Widget::slot_fmu_thread_finished(int tab, const std::vector<double> vecOutputValue)
 {
     update_algorithm_tableWidget_out(tab, vecOutputValue);
+}
+
+void Widget::slot_tab_changed(int index)
+{
+
+    if (m_curve_show_dialog->isVisible())
+    {
+        QWidget* pWidget = ui->tabWidget->widget(index);
+        operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
+        if (pOperstionWidget)
+        {
+            pOperstionWidget->update_curve_show_dialog();
+        }
+    }
+
 }
 
 void Widget::update_algorithm_tableWidget_out(const int& tab, const std::vector<double>& vecOutputValue)
@@ -116,17 +132,19 @@ void Widget::reset_control_btns()
     m_calculate_control_dialog->reset_btns();
 }
 
-//void Widget::update_relevance_tableWidget_input(const int& tab, const QVector<double>& outputValue)
-//{
-//    QWidget* pWidget = ui->tabWidget->widget(tab);
-//    operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
-//    if (pOperstionWidget)
-//    {
-//       //pOperstionWidget->combine_relevacne_port_data(outputValue);
-//    }
-//
-//}
+curveShowDialog* Widget::get_curve_ptr()
+{
+    return m_curve_show_dialog;
+}
 
+void Widget::closeEvent(QCloseEvent* event)
+{
+    if (m_curve_show_dialog)
+    {
+        delete m_curve_show_dialog;
+    }
+    QWidget::closeEvent(event);
+}
 
 
 void Widget::create_xml_configuration()
@@ -347,30 +365,30 @@ void Widget::slot_btn_calculate_control()
 {
     m_calculate_control_dialog->exec();
 
-    if (m_pThread_pool->instance()->get_thread_size() > 0)
-    {
-        QMessageBox msgBox;
-        msgBox.setText(QString::fromLocal8Bit("提示"));
-        msgBox.setInformativeText(QString::fromLocal8Bit("确认退出,终止计算?"));
-        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Ok);
-        // 将原本显示“Yes”的按钮改为显示“是”
-        msgBox.button(QMessageBox::Ok)->setText(QString::fromLocal8Bit("确定"));
-        // 将原本显示“No”的按钮改为显示“否”
-        msgBox.button(QMessageBox::Cancel)->setText(QString::fromLocal8Bit("取消"));
-       
-        int ret = msgBox.exec();
-        if (ret == QMessageBox::Ok) 
-        {
-            //若用户点击确认，结束线程池;
-            m_calculate_control_dialog->slot_btn_stop();
-        }
-        else 
-        {
-            //若用户点击取消，
-            m_calculate_control_dialog->exec();
-        }
-    }
+    //if (m_pThread_pool->instance()->get_thread_size() > 0)
+    //{
+    //    QMessageBox msgBox;
+    //    msgBox.setText(QString::fromLocal8Bit("提示"));
+    //    msgBox.setInformativeText(QString::fromLocal8Bit("确认退出,终止计算?"));
+    //    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    //    msgBox.setDefaultButton(QMessageBox::Ok);
+    //    // 将原本显示“Yes”的按钮改为显示“是”
+    //    msgBox.button(QMessageBox::Ok)->setText(QString::fromLocal8Bit("确定"));
+    //    // 将原本显示“No”的按钮改为显示“否”
+    //    msgBox.button(QMessageBox::Cancel)->setText(QString::fromLocal8Bit("取消"));
+    //   
+    //    int ret = msgBox.exec();
+    //    if (ret == QMessageBox::Ok) 
+    //    {
+    //        //若用户点击确认，结束线程池;
+    //        m_calculate_control_dialog->slot_btn_stop();
+    //    }
+    //    else 
+    //    {
+    //        //若用户点击取消，
+    //        m_calculate_control_dialog->exec();
+    //    }
+    //}
     
 }
 
