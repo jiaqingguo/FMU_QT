@@ -35,9 +35,15 @@ void fum_thread::set_cur_tab(const int& cur_tab_index)
     m_cur_tab_index = cur_tab_index;
 }
 
-void fum_thread::set_fmu_file(const std::string& fmuPath)
+//void fum_thread::set_step_size(double stepSize)
+//{
+//    
+//}
+
+void fum_thread::set_fmu_file(const std::string& fmuPath,const double &stepSize)
 {
     m_str_fmu_file_path = fmuPath;
+    m_stepSize = stepSize;
 }
 
 void fum_thread::set_input_value(const std::vector<fmi2Real>& vecInputValue)
@@ -87,7 +93,6 @@ void fum_thread::run()
 
     
     // ´«¸øËã·¨;
-
     fmi2::fmu fmu(m_str_fmu_file_path);
     auto cs_fmu = fmu.as_cs_fmu();
     auto md = cs_fmu->get_model_description();
@@ -96,9 +101,6 @@ void fum_thread::run()
     slave1->enter_initialization_mode();
     slave1->exit_initialization_mode();
 
-
-    //std::vector<fmi2Real> wef(m_vecInputValueReference.size());
-    //std::vector<fmi2Real> ref(m_vecOutputValueReference.size());
     m_vecOutputValue.resize(m_vecOutputValueReference.size());
 
         
@@ -108,7 +110,7 @@ void fum_thread::run()
         //return;
     }
 
-    if (!slave1->step(1))
+    if (!slave1->step(m_stepSize))
     {
         //return;
     }

@@ -13,6 +13,8 @@ calculate_control_dialog::calculate_control_dialog(QWidget *parent) :
     ui->btn_pause->setEnabled(false);
     ui->btn_stop->setEnabled(false);
     ui->spinBox->setMinimum(1);
+  
+    ui->spinBox->setValue(1);
     connect(ui->btn_start, &QPushButton::clicked, this, &calculate_control_dialog::slot_btn_start);
     connect(ui->btn_pause, &QPushButton::clicked, this, &calculate_control_dialog::slot_btn_pause);
     connect(ui->btn_stop, &QPushButton::clicked, this, &calculate_control_dialog::slot_btn_stop);

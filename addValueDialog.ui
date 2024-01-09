@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>450</width>
     <height>187</height>
    </rect>
   </property>
@@ -61,7 +61,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBox_portName"/>
+      <widget class="QComboBox" name="comboBox_portName">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="label_5">

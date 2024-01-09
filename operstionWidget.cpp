@@ -13,7 +13,7 @@
 #include "widget.h"
 
 using namespace fmi4cpp;
-const double stepSize = 1;
+
 
 
 QMap<int, QMap<int, QMap<int, int>>> operstionWidget::m_mapRelevance = { };
@@ -33,11 +33,6 @@ operstionWidget::operstionWidget(const int num,QWidget *parent) :m_iAlgorithmNum
     ui->tableWidget_input->setVerticalHeaderLabels(QStringList() << QStringLiteral("端口 ") << QStringLiteral("数值 "));
     ui->tableWidget_input->horizontalHeader()->setHidden(true);
     ui->tableWidget_input->setContextMenuPolicy(Qt::CustomContextMenu);
-   // ui->tableWidget_input->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);//自动设置列宽
-   // ui->tableWidget_input->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    //ui->tableWidget_input->setHorizontalHeaderLabels(QStringList() << "" << "");
-       //设置表格数据区内的所有单元格都不允许编辑
-       //TableWidget.setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     ui->tableWidget_output->setRowCount(2);
     ui->tableWidget_output->setVerticalHeaderLabels(QStringList() << QStringLiteral("端口 ") << QStringLiteral("数值 "));
@@ -61,9 +56,7 @@ operstionWidget::operstionWidget(const int num,QWidget *parent) :m_iAlgorithmNum
 operstionWidget::~operstionWidget()
 {
     delete ui;
-   /* if (m_thread.joinable())
-        m_thread.join();*/
-    qDebug()<<"~operstionWidget()";
+  
     m_mapRelevance.remove(m_iAlgorithmNum);
     m_mapAlgorithmName.remove(m_iAlgorithmNum);
     m_mapOutputPort.remove(m_iAlgorithmNum);
@@ -93,6 +86,11 @@ std::vector<double> operstionWidget::get_tableWidgetInput()
 std::string operstionWidget::get_fmm_file_path()
 {
     return m_fileInfo.absoluteFilePath().toStdString();
+}
+
+double operstionWidget::get_fmu_step_size()
+{
+   return m_stepSize; 
 }
 
 std::vector<fmi2ValueReference> operstionWidget::get_input_reference()
@@ -177,12 +175,19 @@ std::string operstionWidget::string_To_UTF8(const std::string& str)
 bool operstionWidget::modifyFileFormat(const QString &strFliePath, const QString &strSavePath)
 {
     // 打开输入文件
-    std::ifstream inputFile(strFliePath.toStdString(), std::ios::binary);
+    std::ifstream inputFile(strFliePath.toStdString(), std::ios::binary);  //无法打开中文路径;
     if (!inputFile)
     {
         qDebug() << "无法打开输入文件"<< strFliePath ;
         return 1;
     }
+    //std::wifstream file(strFliePath.toStdString());
+    //if (!file.is_open()) {
+    //    // 文件打开失败的处理
+    //   // std::wcerr << L"无法打开文件: " << path << std::endl;
+    //    return 1;
+    //}
+
 
     // 打开输出文件
     std::ofstream outputFile(strSavePath.toStdString(), std::ios::binary);
@@ -341,6 +346,16 @@ bool operstionWidget::readXML(const QString strXmlPath)
         //获取XML根结点
 
         QDomElement root= doc.documentElement(); //class结点
+
+        // 获取步长节点;
+        QDomNodeList nodeListStep = root.elementsByTagName("DefaultExperiment");//通过标签名获取结点列表
+        if (nodeListStep.size() > 0)
+        {
+            QDomElement element = nodeListStep.at(0).toElement();    //通过索引获取QDomElement对象
+            QString strStepSize = element.attribute("stepSize");                   //获取sex属性值
+            m_stepSize = element.attribute("stepSize").toDouble();
+        }
+       
         //遍历每个student结点
         QDomNodeList nodeList=root.elementsByTagName("ScalarVariable");//通过标签名获取结点列表
 
@@ -372,40 +387,19 @@ bool operstionWidget::readXML(const QString strXmlPath)
             }
 
         }
-        // QTableWidgetItem *pItemValue = new QTableWidgetItem("");
+    
         // 界面显示;
 
-        //if (!m_thread.joinable())
-           // m_thread = std::thread(&operstionWidget::load_tableWidget_show, this);
-       
-       ui->tableWidget_input->clearContents();
+        ui->tableWidget_input->clearContents();
         ui->tableWidget_input->setColumnCount(m_vecInputPort.size());
-       /* QTableWidgetItem* pItem;
-        for(int i=0;i<ui->tableWidget_input->columnCount();i++)
-        {
-            pItem = new QTableWidgetItem(m_vecInputPort[i]);
-            ui->tableWidget_input->setItem(0,i, pItem);
 
-          
-            pItem = new QTableWidgetItem("");
-            ui->tableWidget_input->setItem(1,i, pItem);
-        }*/
 
         ui->tableWidget_output->clearContents();
         ui->tableWidget_output->setColumnCount(m_mapOutputPort[m_iAlgorithmNum].size());
 
-      /*  for(int i=0;i<ui->tableWidget_output->columnCount();i++)
-        {
-            QTableWidgetItem *pItemPort = new QTableWidgetItem(m_mapOutputPort[m_iAlgorithmNum].at(i));
-            pItemPort->setCheckState(Qt::Unchecked);
-            ui->tableWidget_output->setItem(0,i,pItemPort);
-
-            QTableWidgetItem *pItemValue = new QTableWidgetItem("");
-            ui->tableWidget_output->setItem(1,i,pItemValue);
-
-        }*/
+  
         std::thread thread_(&operstionWidget::load_tableWidget_show, this);
-      //  thread_.join();
+
         thread_.detach();
         return 1;
 }
@@ -431,14 +425,16 @@ bool operstionWidget::create_xml_configuration(QFile& file, QDomDocument& doc, Q
     QDomElement AlgorithmNum = doc.createElement(tr("Algorithm"));
     QDomAttr num = doc.createAttribute(tr("num"));
     QDomAttr filePath = doc.createAttribute(tr("filePath"));
+    QDomAttr stepSize = doc.createAttribute(tr("stepSize"));
 
     //int iAlgorithmNum = 1;
     num.setValue(QString::number(m_iAlgorithmNum));
     filePath.setValue(m_fileInfo.filePath());
+    stepSize.setValue(QString::number(m_stepSize));
 
     AlgorithmNum.setAttributeNode(filePath);
     AlgorithmNum.setAttributeNode(num);
-   
+    AlgorithmNum.setAttributeNode(stepSize);
 
     // 输入端口相关数据
     const auto& mapRelevance = m_mapRelevance[m_iAlgorithmNum];
@@ -456,7 +452,17 @@ bool operstionWidget::create_xml_configuration(QFile& file, QDomDocument& doc, Q
         auto pItem = ui->tableWidget_input->item(1, i);
         if (pItem)
         {
-            value.setValue(pItem->text());
+           
+            QString strValue = pItem->text();
+            if (strValue.isEmpty())
+            {
+                value.setValue(QString::number(0.0));
+            }
+            else
+            {
+                value.setValue(strValue);
+            }
+          
         }
         else
         {
@@ -484,17 +490,7 @@ bool operstionWidget::create_xml_configuration(QFile& file, QDomDocument& doc, Q
     {
         m_mapRelevance.remove(m_iAlgorithmNum);
     }
-    //else
-    //{
-    //    //QMessageBox::critical(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("!"));
-    //    qDebug() << m_iAlgorithmNum << " 输入端口数量为0，此算法不保存配置！";
-    //    return false;
-    //}
-    
-    // 输出端口相关数据;
-  //  const auto & vecOutputData = m_mapOutputPort[m_iAlgorithmNum];
-   
-    
+       
     
     for (int i = 0; i < vecOutputData.size(); i++)
     {
@@ -514,63 +510,24 @@ bool operstionWidget::create_xml_configuration(QFile& file, QDomDocument& doc, Q
         AlgorithmNum.appendChild(elment_output);
     }
      
-     //else
-     //{
-     //    qDebug() << m_iAlgorithmNum << " 输出端口数量为0，此算法不保存配置！";
-     //    return false;
-     //}
     
      root.appendChild(AlgorithmNum);
-
-
-
-  /*  QDomElement title = doc.createElement(tr("书名"));
-    QDomElement author = doc.createElement(tr("作者"));
-    QDomText text;
-   
-    AlgorithmNum.setAttributeNode(num);
-    AlgorithmNum.setAttributeNode(filePath);
-    text = doc.createTextNode("Qt");
-    title.appendChild(text);
-    text = doc.createTextNode("shiming");
-    author.appendChild(text);*/
-    //AlgorithmNum.appendChild(title);
-    //AlgorithmNum.appendChild(author);
-   
-
-    //添加第二个book元素及其子元素
-    //AlgorithmNum = doc.createElement(tr("图书"));
-    //num = doc.createAttribute(tr("编号"));
-    //title = doc.createElement(tr("书名"));
-    //author = doc.createElement(tr("作者"));
-    //num.setValue("2");
-    //AlgorithmNum.setAttributeNode(num);
-    //text = doc.createTextNode("Linux");
-    //title.appendChild(text);
-    //text = doc.createTextNode("LiMing");
-    //author.appendChild(text);
-    //AlgorithmNum.appendChild(title);
-    //AlgorithmNum.appendChild(author);
-   // root.appendChild(AlgorithmNum);
-
-    //QTextStream out(&file);
-    //doc.save(out, 4);
-    //file.close();
 
     return true;
 }
 
-void operstionWidget::load_algorithm_conguration(const QString filePath)
+void operstionWidget::load_algorithm_conguration(const QString filePath, const double stepSize)
 {
     m_fileInfo = filePath;
+    m_stepSize = stepSize;
     if (m_fileInfo.fileName().isEmpty())
     {
         return;
     }
     ui->label_algorithm->setText(m_fileInfo.fileName());
     m_mapAlgorithmName[m_iAlgorithmNum] = m_fileInfo.fileName();
-   
 }
+
 
 void operstionWidget::load_data_conguration(const QVector<QString>& vecInputPort, std::vector<fmi2ValueReference>& vecInputValueReference, const QVector<double>& vecInputValue, const QVector<QString>& vecOutputPort, std::vector<fmi2ValueReference>& vecOutputValueReference)
 {
@@ -585,32 +542,12 @@ void operstionWidget::load_data_conguration(const QVector<QString>& vecInputPort
     ui->tableWidget_input->clearContents();
     ui->tableWidget_input->setColumnCount(m_vecInputPort.size());
 
-    //for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
-    //{
-    //    QTableWidgetItem* pItemPort = new QTableWidgetItem(m_vecInputPort[i]);
-    //    ui->tableWidget_input->setItem(0, i, pItemPort);
-
-    //    QTableWidgetItem* pItemValue = new QTableWidgetItem(QString::number(vecInputValue.at(i)));
-    //    ui->tableWidget_input->setItem(1, i, pItemValue);
-
-    //}
 
     ui->tableWidget_output->clearContents();
     ui->tableWidget_output->setColumnCount(m_mapOutputPort[m_iAlgorithmNum].size());
 
-    //for (int i = 0; i < ui->tableWidget_output->columnCount(); i++)
-    //{
-    //    QTableWidgetItem* pItemPort = new QTableWidgetItem(m_mapOutputPort[m_iAlgorithmNum].at(i));
-    //    pItemPort->setCheckState(Qt::Unchecked);
-    //    ui->tableWidget_output->setItem(0, i, pItemPort);
-
-    //    QTableWidgetItem* pItemValue = new QTableWidgetItem("");
-    //    ui->tableWidget_output->setItem(1, i, pItemValue);
-
-    //}
-
     std::thread thread_(&operstionWidget::load_tableWidget_show, this);
-    //thread_.join();
+   
     thread_.detach();
 }
 
@@ -623,14 +560,6 @@ int operstionWidget::get_algorithm_num()
 {
     return m_iAlgorithmNum;
 }
-
-//void operstionWidget::set_port_relevance(int srcOutIndex, int srcAlgorithNum, int dstInputIndex)
-//{
-//    /*auto &multMap = m_mapMultPort[dstInputIndex];
-//    multMap.remove(srcAlgorithNum, srcOutIndex);
-//    multMap.insert(srcAlgorithNum, dstInputIndex);*/
-//   
-//}
 
 void operstionWidget::load_tableWidget_show()
 {
@@ -739,7 +668,7 @@ void operstionWidget::use_fmu_caculate()
         return;
     }
 
-    if (!slave1->step(stepSize))
+    if (!slave1->step(m_stepSize))
     {
         return;
     }

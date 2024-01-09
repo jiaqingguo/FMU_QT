@@ -14,22 +14,9 @@ curveShowDialog::curveShowDialog(QWidget *parent) :
     layout->setMargin(0);
     setLayout(layout);
 
-    //m_pChartView= new QtCharts::QChartView(this);
 
     m_pChartView = new ChartView();
 
-
-    //m_pChartView->setRenderHint(QPainter::Antialiasing);
-
-    //// 启用滚轮缩放
-    //m_pChartView->setRenderHint(QPainter::Antialiasing, true);
-    //m_pChartView->setRenderHint(QPainter::SmoothPixmapTransform, true);
-    //m_pChartView->setRubberBand(QtCharts::QChartView::NoRubberBand);
-
-    //// 设置缩放的中心点为鼠标位置
-    //m_pChartView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-
-    //:setRubberBand(QChartView::RectangleRubberBand)
     layout->addWidget(m_pChartView);
 
     m_pChart = new QtCharts::QChart();

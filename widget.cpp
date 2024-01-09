@@ -34,10 +34,8 @@ Widget::Widget(QWidget *parent)
     QString strName = QString::fromLocal8Bit("算法")+QString::number(m_iAlgorithmNum);
     operstionWidget *pWidget = new operstionWidget(m_iAlgorithmNum);
     connect(pWidget, &operstionWidget::signal_update_port_data, this, &Widget::slot_update_prot_data);
-    /*int tabIndex=*/ ui->tabWidget->addTab(pWidget,strName);
-   /* myUseData *pData=new myUseData;
-    pData->iAlgorithmNum = m_iAlgorithmNum;*/
-   // ui->tabWidget->setUserData(tabIndex, pData);
+    ui->tabWidget->addTab(pWidget,strName);
+ 
     connect(this,&Widget::customContextMenuRequested,this,&Widget::slot_widgetCustomContextMenuRequested);
     connect(ui->btn_calculate_control, &QPushButton::clicked, this, &Widget::slot_btn_calculate_control);
 
@@ -47,6 +45,7 @@ Widget::Widget(QWidget *parent)
 
     m_curve_show_dialog = new curveShowDialog();
     g_pWidget = this;
+    setMinimumHeight(650);
 }
 
 Widget::~Widget()
@@ -249,6 +248,7 @@ bool Widget::load_xml_configuration()
            // ui->listWidget->addItem(e.tagName() + e.attribute(tr("编号")));
 
             QString algorithmNum_path = e_AlgorithmNum.attribute("filePath");
+            double algorithmStepSize = e_AlgorithmNum.attribute("stepSize").toDouble();
             m_iAlgorithmNum = e_AlgorithmNum.attribute("num").toInt();
             QString strName = QString::fromLocal8Bit("算法") + QString::number(m_iAlgorithmNum);
             operstionWidget* pWidget = new operstionWidget(m_iAlgorithmNum);
@@ -256,7 +256,7 @@ bool Widget::load_xml_configuration()
 
             ui->tabWidget->addTab(pWidget, strName);
 
-            pWidget->load_algorithm_conguration(algorithmNum_path);
+            pWidget->load_algorithm_conguration(algorithmNum_path, algorithmStepSize);
 
             std::vector<unsigned int> vecInputValueReference;
 
@@ -406,7 +406,7 @@ void Widget::slot_recv_calculate_control(int flag, int calculate_count/* = 0*/)
                 operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
                
                 fum_thread* pThread = new fum_thread;
-                pThread->set_fmu_file(pOperstionWidget->get_fmm_file_path());
+                pThread->set_fmu_file(pOperstionWidget->get_fmm_file_path(), pOperstionWidget->get_fmu_step_size());
                 
                 pThread->set_cur_tab(i);
                 pThread->set_thread_number(thread_count);

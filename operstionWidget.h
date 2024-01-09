@@ -28,6 +28,7 @@ public:
     std::vector<double> get_tableWidgetInput();
    // void set_tableWidgetOutput()
     std::string  get_fmm_file_path();
+    double get_fmu_step_size();
     std::vector<fmi2ValueReference> get_input_reference();
     std::vector<fmi2ValueReference> get_output_reference();
     void get_input_data( std::vector<fmi2Real>& vecInputValue,  std::vector<fmi2ValueReference>& vecInputValueReference);
@@ -44,7 +45,7 @@ public:
 
     bool create_xml_configuration(QFile& file, QDomDocument& doc, QDomElement& root);
 
-    void load_algorithm_conguration(const QString filePath);
+    void load_algorithm_conguration(const QString filePath,const double stepSize);
     void load_data_conguration(const QVector<QString> &vecInputPort, std::vector<fmi2ValueReference> &vecInputValueReference,const QVector<double>& vecInputValue, const QVector<QString>& vecOutputPort, std::vector<fmi2ValueReference>& vecOutputValueReference );
     void load_relevance_conguration(const QMap<int, QMap<int, int>>& mapRelevance);
     int get_algorithm_num();
@@ -89,6 +90,7 @@ private:
     QVector<QString> m_vecInputPort;   // 输入端口;
     QSet<int> m_setOutputIndex;
 
+    double m_stepSize = 1;
     
     int m_iCalculateCount =0;
     std::thread							m_thread;

@@ -19,6 +19,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     ChartView.cpp \
     addValueDialog.cpp \
+    appkey.cpp \
     calculate_control_dialog.cpp \
     calculate_control_dialog.cpp \
     curveShowDialog.cpp \
@@ -31,6 +32,7 @@ SOURCES += \
 HEADERS += \
     ChartView.h \
     addValueDialog.h \
+    appkey.h \
     calculate_control_dialog.h \
     calculate_control_dialog.h \
     curveShowDialog.h \

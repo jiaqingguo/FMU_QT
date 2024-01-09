@@ -46,7 +46,7 @@ public:
     {
         if (addValueDialog->objectName().isEmpty())
             addValueDialog->setObjectName(QString::fromUtf8("addValueDialog"));
-        addValueDialog->resize(400, 187);
+        addValueDialog->resize(450, 187);
         verticalLayout = new QVBoxLayout(addValueDialog);
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
         horizontalLayout = new QHBoxLayout();
@@ -87,6 +87,11 @@ public:
 
         comboBox_portName = new QComboBox(addValueDialog);
         comboBox_portName->setObjectName(QString::fromUtf8("comboBox_portName"));
+        QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(comboBox_portName->sizePolicy().hasHeightForWidth());
+        comboBox_portName->setSizePolicy(sizePolicy);
 
         horizontalLayout_2->addWidget(comboBox_portName);
 

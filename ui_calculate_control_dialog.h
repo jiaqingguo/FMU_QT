@@ -57,6 +57,7 @@ public:
 
         spinBox = new QSpinBox(calculate_control_dialog);
         spinBox->setObjectName(QString::fromUtf8("spinBox"));
+        spinBox->setMaximum(999999999);
 
         horizontalLayout->addWidget(spinBox);
 

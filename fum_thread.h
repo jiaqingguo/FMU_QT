@@ -18,9 +18,10 @@ public:
     void set_thread_number(const int& number);
     int  get_thread_number();
     int  get_cur_tab();
+  //  void set_step_size(double stepSize);
     void set_caculate_count_data(const int& cylce_count, const int tab_cout, const int& m_cur_tab_index);
     void set_cur_tab(const int& cur_tab_index);
-    void set_fmu_file(const std::string& fmuPath);
+    void set_fmu_file(const std::string& fmuPath, const double& stepSize);
     void set_input_value(const std::vector<fmi2Real>& vecInputValue);
     void set_input_reference(const std::vector<fmi2ValueReference>& vecInputValueReference);
     void set_input_data(const std::vector<fmi2Real>& vecInputValue, const std::vector<fmi2ValueReference>& vecInputValueReference);
@@ -39,6 +40,7 @@ private:
     int m_thread_number = -1;   // 当前线程数;
   //  int m_cur_cycle = -1;       // 当前循环;
     int m_cur_tab_index = -1;   // 对应tab页;
+    double  m_stepSize = 1;
     // int m_tab_cout = 0; 
     QVector<int> m_vecAlgorithNum;
     std::string m_str_fmu_file_path;
