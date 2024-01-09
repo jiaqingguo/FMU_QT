@@ -34,8 +34,10 @@ public:
     void get_input_data( std::vector<fmi2Real>& vecInputValue,  std::vector<fmi2ValueReference>& vecInputValueReference);
     void update_tableWidget_out(const std::vector<double>& vecOutputValue);
 
+    std::string UTF8_To_string(const std::string& str);
     std::string string_To_UTF8(const std::string& str);
     bool modifyFileFormat(const QString &strFliePath,const QString &strSavePath);
+    bool copyModifyFileFormat(const QString& strFliePath, const QString& strSavePath);
     bool decompressingFiles(const QString &strZipPath,const QString &strSavePath);
     bool createFolder(const QString &folderPath);
     bool deleteFile(const QString strFilePath);

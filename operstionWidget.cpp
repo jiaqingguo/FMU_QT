@@ -1,6 +1,7 @@
 ﻿#include <QFileDialog>
 #include <QDebug>
 #include <fstream>
+#include <QFile>
 
 #include <qmessagebox.h>
 #include "QtGui/private/qzipreader_p.h"
@@ -145,6 +146,33 @@ void operstionWidget::update_tableWidget_out(const std::vector<double>& vecOutpu
     ui->comboBox_countShow->setCurrentIndex(index);
 }
 
+std::string operstionWidget::UTF8_To_string(const std::string& str)
+{
+    int nwLen = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, NULL, 0);
+
+    wchar_t* pwBuf = new wchar_t[nwLen + 1];//一定要加1，不然会出现尾巴  
+    memset(pwBuf, 0, nwLen * 2 + 2);
+
+    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.length(), pwBuf, nwLen);
+
+    int nLen = WideCharToMultiByte(CP_ACP, 0, pwBuf, -1, NULL, NULL, NULL, NULL);
+
+    char* pBuf = new char[nLen + 1];
+    memset(pBuf, 0, nLen + 1);
+
+    WideCharToMultiByte(CP_ACP, 0, pwBuf, nwLen, pBuf, nLen, NULL, NULL);
+
+    std::string retStr = pBuf;
+
+    delete[]pBuf;
+    delete[]pwBuf;
+
+    pBuf = NULL;
+    pwBuf = NULL;
+
+    return retStr;
+}
+
 std::string operstionWidget::string_To_UTF8(const std::string& str)
 {
     int nwLen = ::MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, NULL, 0);
@@ -174,41 +202,62 @@ std::string operstionWidget::string_To_UTF8(const std::string& str)
 
 bool operstionWidget::modifyFileFormat(const QString &strFliePath, const QString &strSavePath)
 {
-    // 打开输入文件
-    std::ifstream inputFile(strFliePath.toStdString(), std::ios::binary);  //无法打开中文路径;
-    if (!inputFile)
-    {
-        qDebug() << "无法打开输入文件"<< strFliePath ;
-        return 1;
-    }
-    //std::wifstream file(strFliePath.toStdString());
-    //if (!file.is_open()) {
-    //    // 文件打开失败的处理
-    //   // std::wcerr << L"无法打开文件: " << path << std::endl;
+    //// 打开输入文件
+    //std::ifstream inputFile(strFliePath.toStdString(), std::ios::binary);
+    //if (!inputFile)
+    //{
+    //    qDebug() << "无法打开输入文件"<< strFliePath ;
     //    return 1;
     //}
 
+    //// 打开输出文件
+    //std::ofstream outputFile(strSavePath.toStdString(), std::ios::binary);
+    //if (!outputFile)
+    //{
+    //    qDebug()  << "无法创建输出文件"<<strSavePath ;
+    //    return 1;
+    //}
 
-    // 打开输出文件
-    std::ofstream outputFile(strSavePath.toStdString(), std::ios::binary);
-    if (!outputFile)
-    {
-        qDebug()  << "无法创建输出文件"<<strSavePath ;
-        return 1;
+    //// 逐字节复制文件内容
+    //char ch;
+    //while (inputFile.get(ch))
+    //{
+    //    outputFile.put(ch);
+    //}
+
+    //// 关闭文件
+    //inputFile.close();
+    //outputFile.close();
+
+    //qDebug()<< "文件复制成功";
+    return copyModifyFileFormat(strFliePath, strSavePath);
+    return true;
+}
+
+bool operstionWidget::copyModifyFileFormat(const QString& strFliePath, const QString& strSavePath)
+{
+    QFile inputFile(strFliePath);
+    if (!inputFile.open(QIODevice::ReadOnly)) {
+        qDebug() << "无法打开输入文件" << strFliePath;
+        return false;
     }
 
-    // 逐字节复制文件内容
-    char ch;
-    while (inputFile.get(ch))
-    {
-        outputFile.put(ch);
+    //QFile outputFile(strSavePath);
+    //if (!outputFile.open(QIODevice::WriteOnly)) {
+    //    qDebug() << "无法创建输出文件" << strSavePath;
+    //    return false;
+    //}
+
+    // 检查目标文件是否存在，如果存在则先删除
+     deleteFile(strSavePath);
+    // 使用Qt的内建方法复制文件
+    if (!QFile::copy(strFliePath,strSavePath)) {
+        qDebug() << "复制文件失败: " << inputFile.errorString();
+        return false;
     }
 
-    // 关闭文件
     inputFile.close();
-    outputFile.close();
-
-    qDebug()<< "文件复制成功";
+    //outputFile.close(); // 实际上不必要，因为QFile的析构函数会自动关闭文件
     return true;
 }
 
@@ -561,6 +610,8 @@ int operstionWidget::get_algorithm_num()
     return m_iAlgorithmNum;
 }
 
+
+
 void operstionWidget::load_tableWidget_show()
 {
 
@@ -634,9 +685,12 @@ void operstionWidget::use_fmu_caculate()
 
     // 传给算法;
     //std::string exe_config_paths = "D:\\CS\\atspaceMicroTimer.fmu";//m_fileInfo.filePath().toStdString();
-    std::string exe_config_paths = m_fileInfo.absoluteFilePath().toStdString();
-    const std::string fmu_path = string_To_UTF8(exe_config_paths);
-    fmi2::fmu fmu(fmu_path);
+    std::string exe_config_paths = m_fileInfo.absoluteFilePath().toStdString(); 
+    //std::string exe_config_paths = m_fileInfo.absoluteFilePath().toLocal8Bit().constData();
+   const std::string fmu_path = string_To_UTF8(exe_config_paths); 
+      //const std::string fmu_path = UTF8_To_string(exe_config_paths);
+
+    fmi2::fmu fmu(exe_config_paths);
     auto cs_fmu = fmu.as_cs_fmu();
     auto md = cs_fmu->get_model_description();
     auto slave1 = cs_fmu->new_instance();
