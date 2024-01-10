@@ -61,6 +61,9 @@
     <ClCompile Include="operstionWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="qexcel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="thread_pool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -88,6 +91,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="operstionWidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qexcel.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="thread_pool.h">
@@ -140,6 +146,12 @@
     <CustomBuild Include="release\moc_predefs.h.cbt">
       <Filter>Generated Files</Filter>
     </CustomBuild>
+    <ClCompile Include="debug\moc_qexcel.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_qexcel.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
     <ClCompile Include="debug\moc_thread_pool.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>

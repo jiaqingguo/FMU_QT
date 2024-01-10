@@ -84,6 +84,7 @@ private slots:
 
     void slot_comboxPaiNumChanged(int index);
     void slot_tableWidgetCellEntered(int row, int column);
+    void slot_btnSaveExecl();
 private:
     Ui::operstionWidget *ui;
     //curveShowDialog* m_curveShowDialog = nullptr;

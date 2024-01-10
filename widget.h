@@ -13,6 +13,7 @@ namespace Ui { class Widget; }
 QT_END_NAMESPACE
 
 class thread_pool;
+class QExcel;
 
 class Widget : public QWidget
 {
@@ -32,6 +33,7 @@ public:
     void reset_control_btns();
 
     curveShowDialog* get_curve_ptr();
+    QExcel* get_execl_ptr();
 protected:
     void closeEvent(QCloseEvent* event);
 private slots:
@@ -61,6 +63,7 @@ private:
     thread_pool* m_pThread_pool;			// 线程池对象
 
     curveShowDialog* m_curve_show_dialog = nullptr;
+    QExcel* m_qexecl;
 };
 
 extern Widget* g_pWidget;

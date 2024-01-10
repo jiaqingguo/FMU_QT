@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>393</width>
+    <width>446</width>
     <height>422</height>
    </rect>
   </property>
@@ -161,6 +161,13 @@
          <widget class="QComboBox" name="comboBox_countShow">
           <property name="currentText">
            <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_saveExecl">
+          <property name="text">
+           <string>导出EXECl</string>
           </property>
          </widget>
         </item>

@@ -12,6 +12,7 @@
 #include "addValueDialog.h"
 #include "curveShowDialog.h"
 #include "widget.h"
+#include "qexcel.h"
 
 using namespace fmi4cpp;
 
@@ -52,6 +53,9 @@ operstionWidget::operstionWidget(const int num,QWidget *parent) :m_iAlgorithmNum
     connect(ui->btn_clear,&QPushButton::clicked,this,&operstionWidget::slot_btnClear);
     connect(ui->btn_curve_show,&QPushButton::clicked,this,&operstionWidget::slot_btnCurveShow);
     connect(ui->comboBox_countShow,SIGNAL(currentIndexChanged(int)),this,SLOT(slot_comboxPaiNumChanged(int)));
+
+    connect(ui->btn_saveExecl, &QPushButton::clicked, this, &operstionWidget::slot_btnSaveExecl);
+   
 }
 
 operstionWidget::~operstionWidget()
@@ -313,9 +317,17 @@ bool operstionWidget::createFolder(const QString &folderPath)
 
 bool operstionWidget::deleteFile(const QString strFilePath)
 {
-    QFile file(strFilePath);
 
-    return  file.remove();
+    QFileInfo fileInfo(strFilePath);
+    if (fileInfo.exists())
+    {
+        QFile file(strFilePath);
+        return  file.remove();
+        
+    }
+   
+    return false;
+   
 }
 
 //bool operstionWidget::deleteDir(const QString strDirPath)
@@ -1120,4 +1132,95 @@ void operstionWidget::slot_tableWidgetCellEntered(int row, int column)
     {
         m_mapRelevance[m_iAlgorithmNum].remove(column);
     }
+}
+
+void operstionWidget::slot_btnSaveExecl()
+{
+
+    QSet<int> saveIndex;
+    saveIndex.clear();
+    bool bSave = true;
+    QVector<QString> outPortName;
+    outPortName.clear();
+    for (int i = 0; i < ui->tableWidget_output->columnCount(); i++)
+    {
+        auto pItem = ui->tableWidget_output->item(0, i);
+        if (pItem)
+        {
+            if (pItem->checkState() == Qt::Checked)
+            {
+                saveIndex.insert(i);
+                outPortName.append(pItem->text());
+
+
+
+                bSave = false;
+            }
+          
+        }
+
+    }
+    if (bSave)
+    {
+        QMessageBox::critical(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("请先勾选要导出的输出位!"));
+        return;
+    }
+
+    QString str_execl_path = QFileDialog::getSaveFileName(this,
+        tr("Save Config"),
+        "",
+        tr("Config Files (*.xls)"));
+
+    if (str_execl_path.isNull())
+    {
+        //点的是取消
+        return;
+    }
+    if (is_file_exist(str_execl_path))
+    {
+        if (!deleteFile(str_execl_path))
+        {
+            QMessageBox::critical(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("无法操作，文件可能已经打开!"));
+
+            return;
+        }
+    }
+    
+    str_execl_path=str_execl_path.replace("/", "\\");
+    if (!g_pWidget->get_execl_ptr()->createFile(str_execl_path))//创建一个Excel文件
+    {
+        QMessageBox::critical(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("无法操作，文件可能已经打开!"));
+
+        return;
+    }
+    // 插入端口名称;
+    int iRow = 1;
+    int cloumn = 1;
+    for (int i = 0; i < outPortName.size(); i++)
+    {
+        g_pWidget->get_execl_ptr()->setCellString(iRow, cloumn, outPortName.at(i));
+        g_pWidget->get_execl_ptr()->setCellBackground(iRow, cloumn, Qt::yellow);
+        cloumn++;
+    }
+    iRow++;
+  
+
+
+    const auto& mapData = m_mapAllOutputData[m_iAlgorithmNum];
+
+
+    for (const auto& paiData : mapData)
+    {
+
+        int i = 1;
+        for (auto portIndex : saveIndex)
+        {
+            g_pWidget->get_execl_ptr()->setCellString(iRow, i,QString::number(paiData.second.at(portIndex)));
+            i++;
+        }
+        iRow++;
+    }
+
+
+    g_pWidget->get_execl_ptr()->save(); //保存文件
 }
