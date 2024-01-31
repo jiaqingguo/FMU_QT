@@ -20,13 +20,19 @@ thread_pool* thread_pool::instance()
 	return m_pSelf;
 }
 
+void thread_pool::setCylclyData(const int &cycleFmuNum, const int& cycleTime)
+{
+	m_cycleFmuNum = cycleFmuNum;
+	m_cycleTime = cycleTime;
+	m_runFinshNum = 0;
+}
+
 void thread_pool::add_thread(fum_thread* pThread, const int& number)
 {
 	if (NULL != pThread)
 	{
 		connect(pThread, SIGNAL(finished()), this, SLOT(slot_thread_finished()));
 		m_mapThread.insert(number,pThread);
-		
 	}
 }
 
@@ -69,7 +75,16 @@ void thread_pool::start_next_thread()
 		auto vecInputValue = g_pWidget->get_algorithm_tableWidget_input(tab);
 		pThread_next->set_input_value(vecInputValue);
 
+		if (m_runFinshNum ==m_cycleFmuNum  && m_cycleTime !=0)
+		{
+			m_runFinshNum = 0;
+			pThread_next->setSleepTime(m_cycleTime);
+		}
 		pThread_next->start();
+	}
+	else
+	{
+		m_runFinshNum = 0;
 	}
 }
 
@@ -149,6 +164,7 @@ void thread_pool::slot_thread_finished()
 	fum_thread * pThread = static_cast<fum_thread*>(sender());
 	if (pThread)
 	{
+		m_runFinshNum++;
 		// 1.获得线程执行结果 刷新主界面;
 		// 1.1 刷新结果
 		auto vecOutputData =pThread->get_output_data();

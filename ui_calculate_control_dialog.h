@@ -29,6 +29,8 @@ public:
     QSpacerItem *horizontalSpacer;
     QLabel *label;
     QSpinBox *spinBox;
+    QLabel *label_2;
+    QSpinBox *spinBox_CycleTime;
     QSpacerItem *horizontalSpacer_2;
     QHBoxLayout *horizontalLayout_2;
     QSpacerItem *horizontalSpacer_3;
@@ -60,6 +62,17 @@ public:
         spinBox->setMaximum(999999999);
 
         horizontalLayout->addWidget(spinBox);
+
+        label_2 = new QLabel(calculate_control_dialog);
+        label_2->setObjectName(QString::fromUtf8("label_2"));
+
+        horizontalLayout->addWidget(label_2);
+
+        spinBox_CycleTime = new QSpinBox(calculate_control_dialog);
+        spinBox_CycleTime->setObjectName(QString::fromUtf8("spinBox_CycleTime"));
+        spinBox_CycleTime->setMaximum(99999);
+
+        horizontalLayout->addWidget(spinBox_CycleTime);
 
         horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
@@ -106,6 +119,7 @@ public:
     {
         calculate_control_dialog->setWindowTitle(QCoreApplication::translate("calculate_control_dialog", "Dialog", nullptr));
         label->setText(QCoreApplication::translate("calculate_control_dialog", "\350\256\241\347\256\227\346\254\241\346\225\260\357\274\232", nullptr));
+        label_2->setText(QCoreApplication::translate("calculate_control_dialog", "\345\221\250\346\234\237\351\227\264\351\232\224\357\274\232", nullptr));
         btn_start->setText(QCoreApplication::translate("calculate_control_dialog", "\345\274\200\345\247\213", nullptr));
         btn_pause->setText(QCoreApplication::translate("calculate_control_dialog", "\346\232\202\345\201\234", nullptr));
         btn_stop->setText(QCoreApplication::translate("calculate_control_dialog", "\345\201\234\346\255\242", nullptr));

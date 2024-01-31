@@ -102,7 +102,11 @@ void QExcel::save() //保存Excel文件
 
 void QExcel::quit() //退出Excel
 {
-    excel->dynamicCall("Quit()");
+    if (excel != nullptr)
+    {
+        excel->dynamicCall("Quit()");
+    }
+   
 
     delete sheet;
     delete sheets;

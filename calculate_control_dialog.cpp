@@ -15,6 +15,7 @@ calculate_control_dialog::calculate_control_dialog(QWidget *parent) :
     ui->spinBox->setMinimum(1);
   
     ui->spinBox->setValue(1);
+    ui->spinBox_CycleTime->setSuffix(QString::fromLocal8Bit("Ãë"));
     connect(ui->btn_start, &QPushButton::clicked, this, &calculate_control_dialog::slot_btn_start);
     connect(ui->btn_pause, &QPushButton::clicked, this, &calculate_control_dialog::slot_btn_pause);
     connect(ui->btn_stop, &QPushButton::clicked, this, &calculate_control_dialog::slot_btn_stop);
@@ -33,10 +34,11 @@ void calculate_control_dialog::reset_btns()
 }
 void calculate_control_dialog::slot_btn_start()
 {
+    int time_cycle = ui->spinBox_CycleTime->value();
     ui->btn_start->setEnabled(false);
     ui->btn_pause->setEnabled(true);
     ui->btn_stop->setEnabled(true);
-    emit signal_calculate_control(1, ui->spinBox->value());
+    emit signal_calculate_control(1, ui->spinBox->value(), time_cycle);
 }
 
 void calculate_control_dialog::slot_btn_pause(bool checked)
@@ -44,15 +46,13 @@ void calculate_control_dialog::slot_btn_pause(bool checked)
     if (checked)
     {
         ui->btn_pause->setText(QString::fromLocal8Bit("¼ÌÐø"));
-        emit signal_calculate_control(2, ui->spinBox->value());
+        emit signal_calculate_control(2, ui->spinBox->value(),0);
     }
     else
     {
         ui->btn_pause->setText(QString::fromLocal8Bit("ÔÝÍ£"));
-        emit signal_calculate_control(3, ui->spinBox->value());
+        emit signal_calculate_control(3, ui->spinBox->value(),0);
     }
-    //qDebug() << "slot_btn_pause()";
-   
 }
 
 void calculate_control_dialog::slot_btn_stop()
@@ -62,6 +62,5 @@ void calculate_control_dialog::slot_btn_stop()
     ui->btn_pause->setText(QString::fromLocal8Bit("ÔÝÍ£"));
     ui->btn_pause->setChecked(false);
     ui->btn_stop->setEnabled(false);
-    emit signal_calculate_control(0, ui->spinBox->value());
-    //qDebug() << "slot_btn_stop()";
+    emit signal_calculate_control(0, ui->spinBox->value(),0);
 }

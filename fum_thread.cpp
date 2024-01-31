@@ -74,6 +74,11 @@ std::vector<fmi2Real> fum_thread::get_output_data()
     return m_vecOutputValue;
 }
 
+void fum_thread::setSleepTime(const int& time)
+{
+    m_sleepTime = time;
+}
+
 
 void fum_thread::run()
 {
@@ -90,7 +95,10 @@ void fum_thread::run()
         qDebug() << QString::fromStdString(m_str_fmu_file_path) << " not exist!!!!";
         return;
     }
-
+    if (m_sleepTime != 0)
+    {
+        sleep(m_sleepTime);
+    }
     
     // ´«¸øËã·¨;
     fmi2::fmu fmu(m_str_fmu_file_path);

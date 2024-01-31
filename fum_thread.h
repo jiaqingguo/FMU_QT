@@ -27,7 +27,7 @@ public:
     void set_input_data(const std::vector<fmi2Real>& vecInputValue, const std::vector<fmi2ValueReference>& vecInputValueReference);
     void set_output_reference(const std::vector<fmi2ValueReference>& vecOutputValueReference);
     std::vector<fmi2Real> get_output_data();
-   
+    void setSleepTime(const int& time);
 private:
     void run();
 
@@ -41,6 +41,8 @@ private:
   //  int m_cur_cycle = -1;       // 当前循环;
     int m_cur_tab_index = -1;   // 对应tab页;
     double  m_stepSize = 1;
+    int m_sleepTime = 0;
+
     // int m_tab_cout = 0; 
     QVector<int> m_vecAlgorithNum;
     std::string m_str_fmu_file_path;

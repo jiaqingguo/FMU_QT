@@ -16,6 +16,7 @@ public:
 public:
 	static thread_pool* instance();					// 申请ThreadPool对象
 
+	void setCylclyData(const int& cycleFmuNum, const int& cycleTime);
 	void add_thread(fum_thread* pThread, const int& number);
 	void start_thread(fum_thread* pThread);	// 开启线程
 	void start_thread(const int& number);	// 开启线程
@@ -32,6 +33,8 @@ public:
 
 	int get_thread_size();
 
+	
+
 signals:
 	void signal_fmu_thread_finished(int tab, const  std::vector<double> vecOutputValue);
 private slots:
@@ -43,8 +46,11 @@ private:
 	//QList<fum_thread*>			m_runningThread;
 	QMap<int, fum_thread*>		m_mapThread;
 	int m_next_thread_num = -1;
-	int  m_control_flags = 1;
-
+	int m_control_flags = 1;
+	int m_cycleTime = 0;
+	int m_cycleFmuNum = 0;
+	int m_runFinshNum = 0;
+	
 };
 
 #endif // THREAD_POOL_H

@@ -17,7 +17,7 @@ public:
 
     void reset_btns();
 signals:
-    void signal_calculate_control(int flag,int count/* =0*/);
+    void signal_calculate_control(int flag,int count, int cycleTime);
 public slots:
     void slot_btn_start();
     void slot_btn_pause(bool checked);

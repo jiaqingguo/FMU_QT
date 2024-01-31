@@ -55,6 +55,8 @@ operstionWidget::operstionWidget(const int num,QWidget *parent) :m_iAlgorithmNum
     connect(ui->comboBox_countShow,SIGNAL(currentIndexChanged(int)),this,SLOT(slot_comboxPaiNumChanged(int)));
 
     connect(ui->btn_saveExecl, &QPushButton::clicked, this, &operstionWidget::slot_btnSaveExecl);
+
+    ui->btn_saveExecl->hide();
    
 }
 
@@ -700,9 +702,9 @@ void operstionWidget::use_fmu_caculate()
     std::string exe_config_paths = m_fileInfo.absoluteFilePath().toStdString(); 
     //std::string exe_config_paths = m_fileInfo.absoluteFilePath().toLocal8Bit().constData();
    const std::string fmu_path = string_To_UTF8(exe_config_paths); 
-      //const std::string fmu_path = UTF8_To_string(exe_config_paths);
+     // const std::string fmu_path = UTF8_To_string(exe_config_paths);
 
-    fmi2::fmu fmu(exe_config_paths);
+    fmi2::fmu fmu(fmu_path);
     auto cs_fmu = fmu.as_cs_fmu();
     auto md = cs_fmu->get_model_description();
     auto slave1 = cs_fmu->new_instance();

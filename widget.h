@@ -49,7 +49,7 @@ private slots:
 
     void slot_btn_calculate_control();
 
-    void slot_recv_calculate_control(int flag,int calculate_count/* = 0*/);
+    void slot_recv_calculate_control(int flag,int calculate_count,int cycleTime/* = 0*/);
 
     void slot_fmu_thread_finished(int tab, const  std::vector<double> vecOutputValue);
 
