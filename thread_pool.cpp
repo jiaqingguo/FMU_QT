@@ -124,10 +124,9 @@ void thread_pool::stop()
 			{
 				pThread->wait();
 			}
-			//int key = itor.key();
+			
 			itor= m_mapThread.erase(itor);
 			
-
 			pThread->deleteLater();
 		}
 	}
@@ -150,14 +149,12 @@ void thread_pool::run_contral(const int& flags)
 	{
 		m_control_flags = flags;
 	}
-
 }
 
 int thread_pool::get_thread_size()
 {
 	return m_mapThread.size();
 }
-
 
 void thread_pool::slot_thread_finished()
 {
@@ -181,14 +178,9 @@ void thread_pool::slot_thread_finished()
 		m_next_thread_num = pThread->get_thread_number() + 1;
 		// 移除执行完的线程;
 		m_mapThread.remove(pThread->get_thread_number());
-		//pThread->deleteLater();
+		
 		pThread->wait();
 		pThread->deleteLater();
-
-		// 1.2刷新 关联端口;
-		// 
-		// 
-
 
 		// 全部执行完毕 重置控制按钮状态;
 		if (m_mapThread.size() == 0)
@@ -201,22 +193,5 @@ void thread_pool::slot_thread_finished()
 			start_next_thread();
 		}
 
-
-
-	/*	else if(m_control_flags==)
-		{
-
-		}*/
-
-		//if (m_mapThread.contains(m_next_thread_num))
-		//{
-		//	fum_thread* pThread_next = m_mapThread[m_next_thread_num];
-		//	int tab = pThread_next->get_cur_tab();
-		//	// 2.1 获得输入;
-		//	auto vecInputValue = g_pWidget->get_algorithm_tableWidget_input(tab);
-		//	pThread_next->set_input_value(vecInputValue);
-
-		//	pThread_next->start();
-		//}
 	}
 }

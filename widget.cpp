@@ -51,40 +51,6 @@ Widget::Widget(QWidget *parent)
 
     m_qexecl = new QExcel();
 
-  //  m_qexecl->createFile("D:\\CS\\1\\Test8.xls"); //创建一个Excel文件
-  //  for (int i = 1; i <= 10; i++)
-  //  {
-  //      for (int j = 1; j <= 10; j++)
-  //      {
-  //          m_qexecl->setCellString(i, j, QString::number(i + j));
-  //      }
-  //  }
-  //  m_qexecl->setCellBackground(1, 1, Qt::red);
-  //  m_qexecl->setCellBackground(2, 2, Qt::green);
-  //  m_qexecl->setCellBackground(3, 3, Qt::blue);
-  ////  m_qexecl->setCellBackground(4, 4, Qt::yellow);
-  //  m_qexecl->setCellBackground(5, 5, Qt::gray);
-  //  m_qexecl->save(); //保存文件
-
-
-  //  m_qexecl->createFile("D:\\CS\\1\\Test7.xls"); //创建一个Excel文件
-  //  for (int i = 1; i <= 10; i++)
-  //  {
-  //      for (int j = 1; j <= 10; j++)
-  //      {
-  //          m_qexecl->setCellString(i, j, QString::number(i + j));
-  //      }
-  //  }
-  //  m_qexecl->setCellBackground(1, 1, Qt::red);
-  //  m_qexecl->setCellBackground(2, 2, Qt::green);
-  //  m_qexecl->setCellBackground(3, 3, Qt::blue);
-  //  //  m_qexecl->setCellBackground(4, 4, Qt::yellow);
-  //  m_qexecl->setCellBackground(5, 5, Qt::gray);
-  //  m_qexecl->save(); //保存文件
-
-  
-
-
 }
 
 Widget::~Widget()
@@ -101,7 +67,6 @@ void Widget::slot_fmu_thread_finished(int tab, const std::vector<double> vecOutp
 
 void Widget::slot_tab_changed(int index)
 {
-
     if (m_curve_show_dialog->isVisible())
     {
         QWidget* pWidget = ui->tabWidget->widget(index);
@@ -193,7 +158,6 @@ void Widget::closeEvent(QCloseEvent* event)
 
 void Widget::create_xml_configuration()
 {
-
     QString str_xml_path = QFileDialog::getSaveFileName(this,
         tr("Save Config"),
         "",
@@ -236,14 +200,13 @@ void Widget::create_xml_configuration()
         }
     }
    
-    //添加根元素
+    //添加根节点;
     doc.appendChild(root);
 
     QTextStream out(&file);
     doc.save(out, 4);
     file.close();
 
-  
 }
 
 bool Widget::load_xml_configuration()
@@ -260,7 +223,6 @@ bool Widget::load_xml_configuration()
     // 先清除配置;
     initialize_configuration();
 
-   // QFile file(QCoreApplication::applicationDirPath() + "/" + "configuration.xml");
     QFile file(strFilePath);
     if (!file.open(QIODevice::ReadOnly))
     {

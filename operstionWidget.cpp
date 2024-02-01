@@ -2,20 +2,15 @@
 #include <QDebug>
 #include <fstream>
 #include <QFile>
-
 #include <qmessagebox.h>
+
 #include "QtGui/private/qzipreader_p.h"
-
-
 #include "operstionWidget.h"
 #include "ui_operstionWidget.h"
 #include "addValueDialog.h"
 #include "curveShowDialog.h"
 #include "widget.h"
 #include "qexcel.h"
-
-using namespace fmi4cpp;
-
 
 
 QMap<int, QMap<int, QMap<int, int>>> operstionWidget::m_mapRelevance = { };
@@ -88,8 +83,6 @@ std::vector<double> operstionWidget::get_tableWidgetInput()
     return vecDoule;
 }
 
-
-
 std::string operstionWidget::get_fmm_file_path()
 {
     return m_fileInfo.absoluteFilePath().toStdString();
@@ -132,17 +125,6 @@ void operstionWidget::update_tableWidget_out(const std::vector<double>& vecOutpu
     int count = ui->tableWidget_output->columnCount();
     if (count < vecOutputValue.size())
         return;
-   
-    // 下面切换拍数 实际会更新Item数值;
-   /* for (int i = 0; i < ui->tableWidget_output->columnCount(); i++)
-    {
-        auto pItem = ui->tableWidget_output->item(1, i);
-        if (pItem)
-        {
-            pItem->setText(QString::number(vecOutputValue.at(i)));
-        }
-
-    }*/
 
     m_iCalculateCount++;
     m_mapAllOutputData[m_iAlgorithmNum][m_iCalculateCount] = vecOutputValue;
@@ -208,6 +190,7 @@ std::string operstionWidget::string_To_UTF8(const std::string& str)
 
 bool operstionWidget::modifyFileFormat(const QString &strFliePath, const QString &strSavePath)
 {
+    // C++方法;
     //// 打开输入文件
     //std::ifstream inputFile(strFliePath.toStdString(), std::ios::binary);
     //if (!inputFile)
@@ -248,12 +231,6 @@ bool operstionWidget::copyModifyFileFormat(const QString& strFliePath, const QSt
         return false;
     }
 
-    //QFile outputFile(strSavePath);
-    //if (!outputFile.open(QIODevice::WriteOnly)) {
-    //    qDebug() << "无法创建输出文件" << strSavePath;
-    //    return false;
-    //}
-
     // 检查目标文件是否存在，如果存在则先删除
      deleteFile(strSavePath);
     // 使用Qt的内建方法复制文件
@@ -269,8 +246,6 @@ bool operstionWidget::copyModifyFileFormat(const QString& strFliePath, const QSt
 
 bool operstionWidget::decompressingFiles(const QString &strZipPath, const QString &strSavePath)
 {
-    //QZipReader zipReader(strZipPath);
-
     createFolder(strSavePath);
     QZipReader zipreader(strZipPath);
     //reader.extractAll(path); // //可加可不加没有什么影响
@@ -331,11 +306,6 @@ bool operstionWidget::deleteFile(const QString strFilePath)
     return false;
    
 }
-
-//bool operstionWidget::deleteDir(const QString strDirPath)
-//{
-//    return false;
-//}
 
 bool operstionWidget::deleteDir(const QString strDirPath)
 {
@@ -467,9 +437,9 @@ bool operstionWidget::readXML(const QString strXmlPath)
         return 1;
 }
 
+// 创建xml配置文件;
 bool operstionWidget::create_xml_configuration(QFile& file, QDomDocument& doc, QDomElement& root)
 {
-
     if (m_vecInputPort.size() <= 0 || (!m_mapOutputPort.contains(m_iAlgorithmNum)))
     {
        qDebug() << m_iAlgorithmNum << "此算法不保存配置！";
@@ -481,8 +451,7 @@ bool operstionWidget::create_xml_configuration(QFile& file, QDomDocument& doc, Q
     {
         qDebug() << m_iAlgorithmNum << "此算法不保存配置！";
         return false;
-    }
-       
+    } 
 
     //添加第一个book元素及其子元素
     QDomElement AlgorithmNum = doc.createElement(tr("Algorithm"));
@@ -589,6 +558,28 @@ void operstionWidget::load_algorithm_conguration(const QString filePath, const d
     }
     ui->label_algorithm->setText(m_fileInfo.fileName());
     m_mapAlgorithmName[m_iAlgorithmNum] = m_fileInfo.fileName();
+
+    if (m_pFmu != nullptr)
+    {
+        delete m_pFmu;
+        m_pFmu = nullptr;
+    }
+
+    std::string exe_config_paths = m_fileInfo.absoluteFilePath().toStdString();
+    const std::string fmu_path = string_To_UTF8(exe_config_paths);
+
+    m_pFmu = new  fmi2::fmu(fmu_path);
+   
+    auto cs_fmu = m_pFmu->as_cs_fmu();
+    auto md = cs_fmu->get_model_description();
+    m_pSlvae =(cs_fmu->new_instance());
+    m_pSlvae->setup_experiment();
+    m_pSlvae->enter_initialization_mode();
+    m_pSlvae->exit_initialization_mode();
+   
+
+    
+
 }
 
 
@@ -624,14 +615,8 @@ int operstionWidget::get_algorithm_num()
     return m_iAlgorithmNum;
 }
 
-
-
 void operstionWidget::load_tableWidget_show()
 {
-
-   // ui->tableWidget_input->clearContents();
-   // ui->tableWidget_input->setColumnCount(m_vecInputPort.size());
-   
     int count = ui->tableWidget_input->columnCount();
     if (m_vecInputValue.size() == m_vecInputPort.size())
     {
@@ -661,8 +646,6 @@ void operstionWidget::load_tableWidget_show()
     }
    
 
-   // ui->tableWidget_output->clearContents();
-    //ui->tableWidget_output->setColumnCount(m_mapOutputPort[m_iAlgorithmNum].size());
     disconnect(ui->tableWidget_output, SIGNAL(cellChanged(int, int)), this, SLOT(slot_tableWigdetCheckedChanged(int, int)));
     for (int i = 0; i < ui->tableWidget_output->columnCount(); i++)
     {
@@ -704,13 +687,13 @@ void operstionWidget::use_fmu_caculate()
    const std::string fmu_path = string_To_UTF8(exe_config_paths); 
      // const std::string fmu_path = UTF8_To_string(exe_config_paths);
 
-    fmi2::fmu fmu(fmu_path);
+   /* fmi2::fmu fmu(fmu_path);
     auto cs_fmu = fmu.as_cs_fmu();
     auto md = cs_fmu->get_model_description();
     auto slave1 = cs_fmu->new_instance();
     slave1->setup_experiment();
     slave1->enter_initialization_mode();
-    slave1->exit_initialization_mode();
+    slave1->exit_initialization_mode();*/
 
 
     std::vector<fmi2Real> wef(m_vecInputValueReference.size());
@@ -731,27 +714,24 @@ void operstionWidget::use_fmu_caculate()
     }
 
 
-    if (!slave1->write_real(m_vecInputValueReference, wef))
+    if (!m_pSlvae->write_real(m_vecInputValueReference, wef))
     {
         return;
     }
 
-    if (!slave1->step(m_stepSize))
+    if (!m_pSlvae->step(m_stepSize))
     {
         return;
     }
 
-    if (!slave1->read_real(m_vecOutputValueReference, ref))
+    if (!m_pSlvae->read_real(m_vecOutputValueReference, ref))
     {
         return;
     }
 
     // 接受算法输出进行显示;
     m_mapAllOutputData[m_iAlgorithmNum][m_iCalculateCount] = ref;
-    qDebug() << "end----use_fmu_caculate()";
- /*   ui->comboBox_countShow->addItem(QString::number(m_iCalculateCount));
-    int index = m_iCalculateCount - 1;
-    ui->comboBox_countShow->setCurrentIndex(index);*/
+    //qDebug() << "end----use_fmu_caculate()"
 }
 
 void operstionWidget::get_relevacne_port_data()

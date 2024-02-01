@@ -84,7 +84,7 @@ void fum_thread::run()
 {
     if (m_str_fmu_file_path.length() <= 0)
         return;
-    if (m_thread_number < 0 /*||  m_cur_cycle<0*/ || m_cur_tab_index <0)
+    if (m_thread_number < 0 || m_cur_tab_index <0)
         return;
     if (m_vecInputValue.size() <= 0 || m_vecInputValueReference.size() <= 0 || m_vecOutputValueReference.size() <= 0)
         return;

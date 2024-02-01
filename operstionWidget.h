@@ -11,6 +11,11 @@
 #include<thread>
 
 #include "fmi4cpp/fmi4cpp.hpp"
+//#include <fmi4cpp/fmi2/cs_fmu.hpp>
+#include "fmi4cpp/fmi2/cs_slave.hpp"
+
+using namespace fmi4cpp;
+using namespace fmi4cpp::fmi2;
 
 namespace Ui {
 class operstionWidget;
@@ -43,8 +48,9 @@ public:
     bool deleteFile(const QString strFilePath);
     bool deleteDir(const QString strDirPath);
     bool is_file_exist(const QString str);
+    // 读取xml配置文件;
     bool readXML(const QString strXmlPath);
-
+    // 创建xml配置文件;
     bool create_xml_configuration(QFile& file, QDomDocument& doc, QDomElement& root);
 
     void load_algorithm_conguration(const QString filePath,const double stepSize);
@@ -103,9 +109,14 @@ private:
     QVector<double> m_vecInputValue;
      //m_mapMultPort;// < 算法num <自身输入端口位，<算法num，关联的输出端口>>
     static QMap<int, QMap<int, QMap<int, int>>> m_mapRelevance;
-   static QMap<int,QString> m_mapAlgorithmName;// 算法名称；
-   static QMap<int,QVector<QString>> m_mapOutputPort; //输出端口;
-   static std::map<int,std::map<int,std::vector<double>>> m_mapAllOutputData; // <<算法顺序，<拍数，输出结果>>;
+    static QMap<int,QString> m_mapAlgorithmName;// 算法名称；
+    static QMap<int,QVector<QString>> m_mapOutputPort; //输出端口;
+    static std::map<int,std::map<int,std::vector<double>>> m_mapAllOutputData; // <<算法顺序，<拍数，输出结果>>;
+
+    fmi2::fmu * m_pFmu=nullptr;
+    std::unique_ptr<cs_slave> m_pSlvae;
+    QVector< std::unique_ptr<cs_slave>*> m_vecSlvae;
+  
 };
 
 #endif // OPERSTIONWIDGET_H
