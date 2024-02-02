@@ -931,9 +931,6 @@ void operstionWidget::slot_tableWigdetCheckedChanged(int row, int col)
     {
         qDebug() << "slot_tableWigdetCheckedChanged" << row << col;
 
-
-    
-       
         const auto& mapData = m_mapAllOutputData[m_iAlgorithmNum];
 
         QMap<int, QVector<double>> mapShowData;
