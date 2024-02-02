@@ -892,28 +892,47 @@ void operstionWidget::slot_btnChooseFile()
 
     // 删除zip;
     deleteFile(strZipPath);
+
+    if (m_pFmu != nullptr)
+    {
+        delete m_pFmu;
+        m_pFmu = nullptr;
+    }
+
+    std::string exe_config_paths = m_fileInfo.absoluteFilePath().toStdString();
+    const std::string fmu_path = string_To_UTF8(exe_config_paths);
+
+    m_pFmu = new  fmi2::fmu(fmu_path);
+
+    auto cs_fmu = m_pFmu->as_cs_fmu();
+    auto md = cs_fmu->get_model_description();
+    m_pSlvae = (cs_fmu->new_instance());
+    m_pSlvae->setup_experiment();
+    m_pSlvae->enter_initialization_mode();
+    m_pSlvae->exit_initialization_mode();
 }
 
 void operstionWidget::slot_tableWigdetCheckedChanged(int row, int col)
 {
     if (row != 0)
         return;
+    auto pItem = ui->tableWidget_output->item(row, col);
+    if (pItem == nullptr)
+        return;
+    if (pItem->checkState() == Qt::Checked)
+    {
+        m_setOutputIndex.insert(col);
+    }
+    else
+    {
+        m_setOutputIndex.remove(col);
+    }
     if (g_pWidget->get_curve_ptr()->isVisible())
     {
         qDebug() << "slot_tableWigdetCheckedChanged" << row << col;
 
 
-        auto pItem = ui->tableWidget_output->item(row, col);
-        if (pItem == nullptr)
-            return;
-        if (pItem->checkState() == Qt::Checked)
-        {
-            m_setOutputIndex.insert(col);
-        }
-        else
-        {
-            m_setOutputIndex.remove(col);
-        }
+    
        
         const auto& mapData = m_mapAllOutputData[m_iAlgorithmNum];
 
@@ -1063,6 +1082,7 @@ void operstionWidget::slot_btnCurveShow()
     const auto &mapData=m_mapAllOutputData[m_iAlgorithmNum];
 
     QMap<int,QVector<double>> mapShowData;
+    mapShowData.clear();
     for(const auto &outIndex: m_setOutputIndex)
     {
         for(auto &vecPaidata : mapData)

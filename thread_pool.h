@@ -3,7 +3,13 @@
 
 #include <QObject>
 #include <QMap>
+#include <qdatetime.h>
 
+#include "fmi4cpp/fmi4cpp.hpp"
+#include "fmi4cpp/fmi2/cs_slave.hpp"
+
+using namespace fmi4cpp;
+using namespace fmi4cpp::fmi2;
 
 
 class fum_thread;
@@ -33,7 +39,12 @@ public:
 
 	int get_thread_size();
 
-	
+	void addFmi2Fmu(const  std::string& strFilePath);
+
+	void setFmi2FmuCount(const int& fmuCount);
+
+	QVector< fmi2::fmu*> m_vecFmi2Fmu;
+	QVector< std::unique_ptr<cs_slave>> m_vecSlave;
 
 signals:
 	void signal_fmu_thread_finished(int tab, const  std::vector<double> vecOutputValue);
@@ -48,8 +59,12 @@ private:
 	int m_next_thread_num = -1;
 	int m_control_flags = 1;
 	int m_cycleTime = 0;
-	int m_cycleFmuNum = 0;
+	int m_cycleFmuNum = 0;// fmu类的数量;
 	int m_runFinshNum = 0;
+
+	QDateTime m_startTime;
+	QDateTime m_endTime;
+	//int m_fmi2FmuCount = -1;// fmu类的数量;
 	
 };
 

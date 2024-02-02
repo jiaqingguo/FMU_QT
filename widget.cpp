@@ -395,8 +395,7 @@ void Widget::slot_btn_calculate_control()
     //        //若用户点击取消，
     //        m_calculate_control_dialog->exec();
     //    }
-    //}
-    
+    //}  
 }
 
 void Widget::slot_recv_calculate_control(int flag, int calculate_count, int cycleTime/* = 0*/)
@@ -404,28 +403,27 @@ void Widget::slot_recv_calculate_control(int flag, int calculate_count, int cycl
     if (flag == 1)
     {
         int count = 0;
-        int thread_count = 0;
-        for (int iCycle = 0; iCycle < calculate_count; iCycle++)
-        {
-             count = ui->tabWidget->count();
+       
+       
+            count = ui->tabWidget->count();
             for (int i = 0; i < count; i++)
             {
                 QWidget* pWidget = ui->tabWidget->widget(i);
                 operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
                
                 fum_thread* pThread = new fum_thread;
-                pThread->set_fmu_file(pOperstionWidget->get_fmm_file_path(), pOperstionWidget->get_fmu_step_size());
+                pThread->set_fmu_file(pOperstionWidget->get_fmm_file_path(), pOperstionWidget->get_fmu_step_size(), calculate_count);
                 
                 pThread->set_cur_tab(i);
-                pThread->set_thread_number(thread_count);
+                pThread->set_thread_number(i);
                 //pThread->set_input_value(pOperstionWidget->get_tableWidgetInput());
                 pThread->set_input_reference(pOperstionWidget->get_input_reference());
                 pThread->set_output_reference(pOperstionWidget->get_output_reference());
               
-                m_pThread_pool->instance()->add_thread(pThread, thread_count);
-                thread_count++;
+                m_pThread_pool->instance()->add_thread(pThread, i);
+               
             }
-        }
+        
         
         QWidget* pWidget = ui->tabWidget->widget(0);
         operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);

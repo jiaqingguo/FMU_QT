@@ -115,7 +115,7 @@ private:
 
     fmi2::fmu * m_pFmu=nullptr;
     std::unique_ptr<cs_slave> m_pSlvae;
-    QVector< std::unique_ptr<cs_slave>*> m_vecSlvae;
+   
   
 };
 

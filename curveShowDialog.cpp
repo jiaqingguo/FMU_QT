@@ -53,7 +53,7 @@ void curveShowDialog::setCurveSHowData(const QString& title, const int paiNum,co
     // 确定x轴 y轴的最大值最小值;
 
     double min = 0;
-    double max = 10;
+    double max = 1;
 
     m_pAxisX->setRange(0, paiNum >2? paiNum :2);
     for(  auto itor = mapData.begin();itor!=mapData.end();itor++)

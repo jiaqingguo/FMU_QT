@@ -1,4 +1,5 @@
 #include <QDebug>
+
 #include "thread_pool.h"
 #include "fum_thread.h"
 #include "widget.h"
@@ -62,6 +63,10 @@ void thread_pool::start_thread(const int& number, const std::vector<double>& vec
 		auto& pThread = m_mapThread[number];
 		pThread->set_input_value(vecInputValue);
 		pThread->start();
+		if (m_cycleTime > 0)
+		{
+			m_startTime = QDateTime::currentDateTime();
+		}
 	}
 }
 
@@ -77,8 +82,15 @@ void thread_pool::start_next_thread()
 
 		if (m_runFinshNum ==m_cycleFmuNum  && m_cycleTime !=0)
 		{
+			m_endTime = QDateTime::currentDateTime();
+			int seconds = m_startTime.secsTo(m_endTime);
+			if (seconds < m_cycleTime)
+			{
+				pThread_next->setSleepTime(m_cycleTime-seconds);
+			}
+			
 			m_runFinshNum = 0;
-			pThread_next->setSleepTime(m_cycleTime);
+			m_startTime = QDateTime::currentDateTime();
 		}
 		pThread_next->start();
 	}
@@ -156,6 +168,17 @@ int thread_pool::get_thread_size()
 	return m_mapThread.size();
 }
 
+void thread_pool::addFmi2Fmu(const std::string& strFilePath)
+{
+
+
+}
+
+void thread_pool::setFmi2FmuCount(const int& fmuCount)
+{
+	m_cycleFmuNum = fmuCount;
+}
+
 void thread_pool::slot_thread_finished()
 {
 	fum_thread * pThread = static_cast<fum_thread*>(sender());
@@ -173,14 +196,26 @@ void thread_pool::slot_thread_finished()
 		// 1.2 数据及拍数；
 
 
-		int number = pThread->get_thread_number();
+		//int number = pThread->get_thread_number();
 
-		m_next_thread_num = pThread->get_thread_number() + 1;
-		// 移除执行完的线程;
-		m_mapThread.remove(pThread->get_thread_number());
+		if (tab == (m_cycleFmuNum - 1))
+		{
+			m_next_thread_num = 0;
+		}
+		else
+		{
+			m_next_thread_num = pThread->get_cur_tab() + 1;
+		}
 		
-		pThread->wait();
-		pThread->deleteLater();
+		if (pThread->IsRunFinsh())
+		{
+			// 移除执行完的线程;
+			m_mapThread.remove(tab);
+
+			pThread->wait();
+			pThread->deleteLater();
+		}
+		
 
 		// 全部执行完毕 重置控制按钮状态;
 		if (m_mapThread.size() == 0)
