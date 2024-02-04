@@ -16,6 +16,7 @@
 
 #include "qexcel.h"
 
+
 Widget* g_pWidget = NULL;
 
 Widget::Widget(QWidget *parent)
@@ -51,6 +52,10 @@ Widget::Widget(QWidget *parent)
     setMinimumHeight(650);
 
     m_qexecl = new QExcel();
+
+    m_graphDialog = new graphDialog();
+    //m_graphDialog->setupPlot();
+   // m_graphDialog->show();
 
 }
 
@@ -137,9 +142,14 @@ void Widget::reset_control_btns()
     m_calculate_control_dialog->reset_btns();
 }
 
-curveShowDialog* Widget::get_curve_ptr()
+//curveShowDialog* Widget::get_curve_ptr()
+//{
+//    return m_curve_show_dialog;
+//}
+
+graphDialog* Widget::getGraphDialog()
 {
-    return m_curve_show_dialog;
+    return m_graphDialog;
 }
 
 QExcel* Widget::get_execl_ptr()

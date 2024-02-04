@@ -55,10 +55,16 @@
     <ClCompile Include="fum_thread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="graphdialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="operstionWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="qcustomplot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="qexcel.cpp">
@@ -90,12 +96,18 @@
     <CustomBuild Include="fum_thread.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="graphdialog.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="operstionWidget.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="qexcel.h">
+    <CustomBuild Include="qcustomplot.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <ClInclude Include="qexcel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <CustomBuild Include="thread_pool.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -134,6 +146,12 @@
     <ClCompile Include="release\moc_fum_thread.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="debug\moc_graphdialog.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_graphdialog.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
     <ClCompile Include="debug\moc_operstionWidget.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -146,10 +164,10 @@
     <CustomBuild Include="release\moc_predefs.h.cbt">
       <Filter>Generated Files</Filter>
     </CustomBuild>
-    <ClCompile Include="debug\moc_qexcel.cpp">
+    <ClCompile Include="debug\moc_qcustomplot.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="release\moc_qexcel.cpp">
+    <ClCompile Include="release\moc_qcustomplot.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="debug\moc_thread_pool.cpp">
@@ -173,6 +191,9 @@
     <ClInclude Include="ui_curveShowDialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="ui_graphdialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
     <ClInclude Include="ui_operstionWidget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -188,6 +209,9 @@
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="curveShowDialog.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="graphdialog.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="operstionWidget.ui">

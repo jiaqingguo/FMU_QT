@@ -812,16 +812,20 @@ void operstionWidget::combine_relevacne_port_data(const std::vector<double> vecN
 
 bool operstionWidget::is_curve_show_dialog()
 {
-    if (g_pWidget->get_curve_ptr())
+    //if (g_pWidget->get_curve_ptr())
+    //{
+    //    return g_pWidget->get_curve_ptr()->isVisible();
+    //}
+    if (g_pWidget->getGraphDialog())
     {
-        return g_pWidget->get_curve_ptr()->isVisible();
+        return g_pWidget->getGraphDialog()->isVisible();
     }
     return false;
 }
 
 void operstionWidget::update_curve_show_dialog()
 {
-    if (g_pWidget->get_curve_ptr() == nullptr)
+    if (g_pWidget->getGraphDialog() == nullptr)
         return;
    
         const auto& mapData = m_mapAllOutputData[m_iAlgorithmNum];
@@ -836,10 +840,10 @@ void operstionWidget::update_curve_show_dialog()
         }
 
         QString title = QString::fromLocal8Bit("算法") + QString::number(m_iAlgorithmNum);
-        g_pWidget->get_curve_ptr()->setCurveSHowData(title,m_iCalculateCount, mapShowData);
-        g_pWidget->get_curve_ptr()->resize(1000, 900);
+        g_pWidget->getGraphDialog()->setDataShow(title,m_iCalculateCount, mapShowData);
+        g_pWidget->getGraphDialog()->resize(1000, 900);
        
-        g_pWidget->get_curve_ptr()->show();
+        g_pWidget->getGraphDialog()->show();
 }
 
 void operstionWidget::update_prot_data(QMap<int, double> portData)
@@ -927,7 +931,7 @@ void operstionWidget::slot_tableWigdetCheckedChanged(int row, int col)
     {
         m_setOutputIndex.remove(col);
     }
-    if (g_pWidget->get_curve_ptr()->isVisible())
+    if (g_pWidget->getGraphDialog()->isVisible())
     {
         qDebug() << "slot_tableWigdetCheckedChanged" << row << col;
 
@@ -942,7 +946,7 @@ void operstionWidget::slot_tableWigdetCheckedChanged(int row, int col)
             }
         }
         QString title = QString::fromLocal8Bit("算法") + QString::number(m_iAlgorithmNum);
-        g_pWidget->get_curve_ptr()->setCurveSHowData(title,m_iCalculateCount, mapShowData);
+        g_pWidget->getGraphDialog()->setDataShow(title,m_iCalculateCount, mapShowData);
     }
    
 }
@@ -1088,10 +1092,13 @@ void operstionWidget::slot_btnCurveShow()
         }
     }
     QString title = QString::fromLocal8Bit("算法") + QString::number(m_iAlgorithmNum);
-    g_pWidget->get_curve_ptr()->setCurveSHowData(title,m_iCalculateCount,mapShowData);
-    g_pWidget->get_curve_ptr()->resize(1000, 900);
+    g_pWidget->getGraphDialog()->setDataShow(title,m_iCalculateCount,mapShowData);
+    g_pWidget->getGraphDialog()->resize(1000, 900);
    
-    g_pWidget->get_curve_ptr()->show();
+    g_pWidget->getGraphDialog()->show();
+
+    g_pWidget->getGraphDialog()->setDataShow(title, m_iCalculateCount, mapShowData);
+    g_pWidget->getGraphDialog()->show();
 
 }
 
@@ -1135,7 +1142,6 @@ void operstionWidget::slot_tableWidgetCellEntered(int row, int column)
 
 void operstionWidget::slot_btnSaveExecl()
 {
-
     QSet<int> saveIndex;
     saveIndex.clear();
     bool bSave = true;
@@ -1150,8 +1156,6 @@ void operstionWidget::slot_btnSaveExecl()
             {
                 saveIndex.insert(i);
                 outPortName.append(pItem->text());
-
-
 
                 bSave = false;
             }

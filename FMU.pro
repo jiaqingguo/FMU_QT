@@ -1,4 +1,4 @@
-QT       += core gui gui-private xml charts axcontainer
+QT       += core gui gui-private xml charts axcontainer printsupport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -24,8 +24,10 @@ SOURCES += \
     calculate_control_dialog.cpp \
     curveShowDialog.cpp \
     fum_thread.cpp \
+    graphdialog.cpp \
     main.cpp \
     operstionWidget.cpp \
+    qcustomplot.cpp \
     qexcel.cpp \
     thread_pool.cpp \
     widget.cpp
@@ -38,7 +40,9 @@ HEADERS += \
     calculate_control_dialog.h \
     curveShowDialog.h \
     fum_thread.h \
+    graphdialog.h \
     operstionWidget.h \
+    qcustomplot.h \
     qexcel.h \
     thread_pool.h \
     widget.h
@@ -48,6 +52,7 @@ FORMS += \
     calculate_control_dialog.ui \
     calculate_control_dialog.ui \
     curveShowDialog.ui \
+    graphdialog.ui \
     operstionWidget.ui \
     widget.ui
 

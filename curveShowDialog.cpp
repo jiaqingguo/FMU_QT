@@ -40,26 +40,6 @@ curveShowDialog::curveShowDialog(QWidget *parent) :
     m_pAxisY->setRange(0, 20);
 
 
-      
-  //  m_pChartView->setRubberBand(QtCharts::QChartView::RectangleRubberBand);
-    //m_pChartView->setInteractive(true);
-    //// 启用橡皮筋效果实现区域放大
-    //m_pChartView->setRubberBand(QtCharts::QChartView::RectangleRubberBand);
-
-    //// 启用鼠标滚轮缩放
-    //m_pChartView->setInteractive(true);
-
-    //// 使用默认的轴
-    //m_pChart->createDefaultAxes();
-    //m_pChart->setAcceptHoverEvents(true);
-
-    //// 创建QChartView，并设置为图表
-  
-    //m_pChartView->setRenderHint(QPainter::Antialiasing);
-    //// 设置允许拖动
-
-    //m_pChart->setAnimationOptions(QtCharts::QChart::AllAnimations);
-    //m_pChartView->setDragMode(QGraphicsView::ScrollHandDrag);
 }
 
 curveShowDialog::~curveShowDialog()

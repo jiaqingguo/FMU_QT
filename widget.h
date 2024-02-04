@@ -5,7 +5,7 @@
 #include <QMap>
 #include "calculate_control_dialog.h"
 #include "curveShowDialog.h"
-//
+#include "graphdialog.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -32,7 +32,8 @@ public:
 
     void reset_control_btns();
 
-    curveShowDialog* get_curve_ptr();
+   // curveShowDialog* get_curve_ptr();
+    graphDialog* getGraphDialog();
     QExcel* get_execl_ptr();
 protected:
     void closeEvent(QCloseEvent* event);
@@ -64,6 +65,7 @@ private:
     thread_pool* m_pThread_pool;			// 线程池对象
 
     curveShowDialog* m_curve_show_dialog = nullptr;
+    graphDialog* m_graphDialog = nullptr;
     QExcel* m_qexecl;
 };
 
