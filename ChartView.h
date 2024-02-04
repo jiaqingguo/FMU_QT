@@ -30,7 +30,9 @@ public:
      bool m_alreadySaveRange;
      double m_xMin, m_xMax, m_yMin, m_yMax;
      QGraphicsSimpleTextItem* m_coordItem;
-
+private:
+    bool m_isTouching = false;
+    QPoint m_lastMousePos;
 };
 
 #endif // CHARTVIEW_H

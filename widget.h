@@ -48,6 +48,7 @@ private slots:
     void slot_update_prot_data(QMap<int, QMap<int, double>> mapNewData);
 
     void slot_btn_calculate_control();
+    void slot_btnClearAll();
 
     void slot_recv_calculate_control(int flag,int calculate_count,int cycleTime/* = 0*/);
 

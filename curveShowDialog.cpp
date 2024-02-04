@@ -16,6 +16,7 @@ curveShowDialog::curveShowDialog(QWidget *parent) :
 
 
     m_pChartView = new ChartView();
+   // m_pChartView = new QtCharts::QChartView();
 
     layout->addWidget(m_pChartView);
 
@@ -38,6 +39,27 @@ curveShowDialog::curveShowDialog(QWidget *parent) :
     m_pAxisY->setTitleText(QString::fromLocal8Bit("输出值"));
     m_pAxisY->setRange(0, 20);
 
+
+      
+  //  m_pChartView->setRubberBand(QtCharts::QChartView::RectangleRubberBand);
+    //m_pChartView->setInteractive(true);
+    //// 启用橡皮筋效果实现区域放大
+    //m_pChartView->setRubberBand(QtCharts::QChartView::RectangleRubberBand);
+
+    //// 启用鼠标滚轮缩放
+    //m_pChartView->setInteractive(true);
+
+    //// 使用默认的轴
+    //m_pChart->createDefaultAxes();
+    //m_pChart->setAcceptHoverEvents(true);
+
+    //// 创建QChartView，并设置为图表
+  
+    //m_pChartView->setRenderHint(QPainter::Antialiasing);
+    //// 设置允许拖动
+
+    //m_pChart->setAnimationOptions(QtCharts::QChart::AllAnimations);
+    //m_pChartView->setDragMode(QGraphicsView::ScrollHandDrag);
 }
 
 curveShowDialog::~curveShowDialog()
@@ -63,6 +85,7 @@ void curveShowDialog::setCurveSHowData(const QString& title, const int paiNum,co
 
        //设置名字
        QString strName ="["+QString::number(itor.key())+"]";
+       ser->setUseOpenGL(true); // 启用OpenGL渲染
        ser->setName(strName);
        ser->setPointsVisible(true);
        int x = 0;
@@ -82,7 +105,7 @@ void curveShowDialog::setCurveSHowData(const QString& title, const int paiNum,co
                min = itor.value().at(i);
            }
        }
-
+      
        m_pAxisY->setRange(min, max);
        //放入charts里
        m_pChart->addSeries(ser);

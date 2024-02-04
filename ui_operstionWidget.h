@@ -199,7 +199,7 @@ public:
         btn_clear_input->setText(QCoreApplication::translate("operstionWidget", "\346\270\205\347\251\272\350\276\223\345\205\245", nullptr));
         groupBox_output->setTitle(QCoreApplication::translate("operstionWidget", "\350\276\223\345\207\272", nullptr));
         btn_calculate->setText(QCoreApplication::translate("operstionWidget", "\346\211\247\350\241\214\350\256\241\347\256\227", nullptr));
-        btn_clear->setText(QCoreApplication::translate("operstionWidget", "\346\270\205\351\231\244\346\211\200\346\234\211\350\276\223\345\207\272", nullptr));
+        btn_clear->setText(QCoreApplication::translate("operstionWidget", "\346\270\205\347\251\272\350\276\223\345\207\272", nullptr));
         label_2->setText(QCoreApplication::translate("operstionWidget", "\350\276\223\345\207\272\346\213\215\346\225\260\357\274\232", nullptr));
         comboBox_countShow->setCurrentText(QString());
         btn_saveExecl->setText(QCoreApplication::translate("operstionWidget", "\345\257\274\345\207\272EXECl", nullptr));

@@ -116,9 +116,6 @@ void fum_thread::run()
         sleep(m_sleepTime);
     }
     
-
-  
-
     //while (true)
     //{
     //    if (m_bRun && m_calculateCount>=0)

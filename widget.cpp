@@ -40,6 +40,7 @@ Widget::Widget(QWidget *parent)
  
     connect(this,&Widget::customContextMenuRequested,this,&Widget::slot_widgetCustomContextMenuRequested);
     connect(ui->btn_calculate_control, &QPushButton::clicked, this, &Widget::slot_btn_calculate_control);
+    connect(ui->btn_clearAll, &QPushButton::clicked, this, &Widget::slot_btnClearAll);
 
     connect(m_pThread_pool->instance(), &thread_pool::signal_fmu_thread_finished, this, &Widget::slot_fmu_thread_finished);
 
@@ -396,6 +397,19 @@ void Widget::slot_btn_calculate_control()
     //        m_calculate_control_dialog->exec();
     //    }
     //}  
+}
+
+void Widget::slot_btnClearAll()
+{
+    int  count = ui->tabWidget->count();
+    for (int i = 0; i < count; i++)
+    {
+        QWidget* pWidget = ui->tabWidget->widget(i);
+        operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
+
+       
+        pOperstionWidget->slot_btnClear();
+    }
 }
 
 void Widget::slot_recv_calculate_control(int flag, int calculate_count, int cycleTime/* = 0*/)

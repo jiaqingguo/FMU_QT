@@ -146,7 +146,7 @@
         <item>
          <widget class="QPushButton" name="btn_clear">
           <property name="text">
-           <string>清除所有输出</string>
+           <string>清空输出</string>
           </property>
          </widget>
         </item>

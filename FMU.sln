@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.34301.259
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FMU", "FMU.vcxproj", "{74ACA411-BDB7-3602-A0BA-FB44F5E45E52}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "scrollbar-axis-range-control", "..\..\..\Download\QCustomPlot\qcustomplot\examples\scrollbar-axis-range-control\scrollbar-axis-range-control.vcxproj", "{8CD0F55E-FC5D-32F1-9F4C-FB1BD23639C5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -15,6 +17,10 @@ Global
 		{74ACA411-BDB7-3602-A0BA-FB44F5E45E52}.Debug|x64.Build.0 = Debug|x64
 		{74ACA411-BDB7-3602-A0BA-FB44F5E45E52}.Release|x64.ActiveCfg = Release|x64
 		{74ACA411-BDB7-3602-A0BA-FB44F5E45E52}.Release|x64.Build.0 = Release|x64
+		{8CD0F55E-FC5D-32F1-9F4C-FB1BD23639C5}.Debug|x64.ActiveCfg = Debug|x64
+		{8CD0F55E-FC5D-32F1-9F4C-FB1BD23639C5}.Debug|x64.Build.0 = Debug|x64
+		{8CD0F55E-FC5D-32F1-9F4C-FB1BD23639C5}.Release|x64.ActiveCfg = Release|x64
+		{8CD0F55E-FC5D-32F1-9F4C-FB1BD23639C5}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

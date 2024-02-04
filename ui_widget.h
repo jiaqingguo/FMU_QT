@@ -26,6 +26,7 @@ public:
     QGridLayout *gridLayout;
     QHBoxLayout *horizontalLayout;
     QPushButton *btn_calculate_control;
+    QPushButton *btn_clearAll;
     QSpacerItem *horizontalSpacer;
     QTabWidget *tabWidget;
     QWidget *tab;
@@ -45,6 +46,11 @@ public:
         btn_calculate_control->setObjectName(QString::fromUtf8("btn_calculate_control"));
 
         horizontalLayout->addWidget(btn_calculate_control);
+
+        btn_clearAll = new QPushButton(Widget);
+        btn_clearAll->setObjectName(QString::fromUtf8("btn_clearAll"));
+
+        horizontalLayout->addWidget(btn_clearAll);
 
         horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
@@ -81,6 +87,7 @@ public:
     {
         Widget->setWindowTitle(QCoreApplication::translate("Widget", "Widget", nullptr));
         btn_calculate_control->setText(QCoreApplication::translate("Widget", "\350\256\241\347\256\227\346\216\247\345\210\266", nullptr));
+        btn_clearAll->setText(QCoreApplication::translate("Widget", " \346\270\205\347\251\272\346\211\200\346\234\211\347\256\227\346\263\225\350\276\223\345\207\272", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("Widget", "Tab 1", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("Widget", "Tab 2", nullptr));
     } // retranslateUi

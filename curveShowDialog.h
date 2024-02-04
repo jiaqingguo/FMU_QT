@@ -28,7 +28,8 @@ public:
 private:
     Ui::curveShowDialog *ui;
     QtCharts::QChart *m_pChart;
-    ChartView *m_pChartView;
+   ChartView *m_pChartView;
+   // QtCharts::QChartView* m_pChartView;
     QtCharts::QValueAxis *m_pAxisX;
     QtCharts::QValueAxis *m_pAxisY;
 };
