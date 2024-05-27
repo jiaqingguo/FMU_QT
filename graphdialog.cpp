@@ -41,6 +41,9 @@ graphDialog::graphDialog(QWidget *parent) :
     ui->plot->plotLayout()->insertRow(0); // 在第一行插入标题
     ui->plot->plotLayout()->addElement(0, 0, m_title); // 将标题元素添加到布局中
 
+     // 启用图例
+    ui->plot->legend->setVisible(true); // 来显示线的名称；
+
     // 定义一个足够大的颜色集合，确保颜色不会重复
     for (int i = 0; i < 256 * 256 * 256; ++i)
     {
@@ -55,14 +58,13 @@ graphDialog::~graphDialog()
     delete ui;
 }
 
-void graphDialog::setDataShow(const QString& title, const int paiNum, const QMap<int, QVector<double>> mapData)
+void graphDialog::setDataShow(const QString& title, const int paiNum, const QMap<int, QVector<double>> &mapData)
 {
     QList<QColor> colors=m_colors;
     // 直接清除所有图形
     ui->plot->clearGraphs();
     ui->plot->replot(); // 重绘图表以更新视图
-    // 启用图例
-    ui->plot->legend->setVisible(true);
+   
    // ui->plot->xAxis->setRange(0, paiNum > 2 ? paiNum : 2, Qt::AlignBottom);
     m_title->setText(title);
 
@@ -85,14 +87,10 @@ void graphDialog::setDataShow(const QString& title, const int paiNum, const QMap
         QString strName = "[" + QString::number(key) + "]";
         ui->plot->graph()->setName(strName); // 设置曲线的名称
 
-        // 设置曲线的随机颜色
-        int r = QRandomGenerator::global()->bounded(256);
-        int g = QRandomGenerator::global()->bounded(256);
-        int b = QRandomGenerator::global()->bounded(256);
-       
+  
       
         QPen pen;
-        pen.setColor(QColor(colors.takeFirst())); // 这里使用红色作为示例，你可以选择任何颜色
+        pen.setColor(QColor(colors.takeFirst())); 
         pen.setWidth(2); // 这里设置线条宽度为2像素
         ui->plot->graph()->setPen(pen);
         // 颜色、样式等设置，可以根据需要调整

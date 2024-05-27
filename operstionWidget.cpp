@@ -828,22 +828,22 @@ void operstionWidget::update_curve_show_dialog()
     if (g_pWidget->getGraphDialog() == nullptr)
         return;
    
-        const auto& mapData = m_mapAllOutputData[m_iAlgorithmNum];
+    const auto& mapData = m_mapAllOutputData[m_iAlgorithmNum];
 
-        QMap<int, QVector<double>> mapShowData;
-        for (const auto& outIndex : m_setOutputIndex)
+    QMap<int, QVector<double>> mapShowData;
+    for (const auto& outIndex : m_setOutputIndex)
+    {
+        for (auto& vecPaidata : mapData)
         {
-            for (auto& vecPaidata : mapData)
-            {
-                mapShowData[outIndex].append(vecPaidata.second.at(outIndex));
-            }
+            mapShowData[outIndex].append(vecPaidata.second.at(outIndex));
         }
+    }
 
-        QString title = QString::fromLocal8Bit("算法") + QString::number(m_iAlgorithmNum);
-        g_pWidget->getGraphDialog()->setDataShow(title,m_iCalculateCount, mapShowData);
-        g_pWidget->getGraphDialog()->resize(1000, 900);
+    QString title = QString::fromLocal8Bit("算法") + QString::number(m_iAlgorithmNum);
+    g_pWidget->getGraphDialog()->setDataShow(title,m_iCalculateCount, mapShowData);
+    g_pWidget->getGraphDialog()->resize(1000, 650);
        
-        g_pWidget->getGraphDialog()->show();
+    g_pWidget->getGraphDialog()->show();
 }
 
 void operstionWidget::update_prot_data(QMap<int, double> portData)
@@ -1093,11 +1093,8 @@ void operstionWidget::slot_btnCurveShow()
     }
     QString title = QString::fromLocal8Bit("算法") + QString::number(m_iAlgorithmNum);
     g_pWidget->getGraphDialog()->setDataShow(title,m_iCalculateCount,mapShowData);
-    g_pWidget->getGraphDialog()->resize(1000, 900);
+    g_pWidget->getGraphDialog()->resize(1000, 650);
    
-    g_pWidget->getGraphDialog()->show();
-
-    g_pWidget->getGraphDialog()->setDataShow(title, m_iCalculateCount, mapShowData);
     g_pWidget->getGraphDialog()->show();
 
 }

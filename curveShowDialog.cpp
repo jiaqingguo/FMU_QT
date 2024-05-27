@@ -47,7 +47,7 @@ curveShowDialog::~curveShowDialog()
     delete ui;
 }
 
-void curveShowDialog::setCurveSHowData(const QString& title, const int paiNum,const QMap<int, QVector<double> > mapData)
+void curveShowDialog::setCurveSHowData(const QString& title, const int paiNum,const QMap<int, QVector<double> > &mapData)
 {
     clear_show();
     m_pChart->setTitle(title);

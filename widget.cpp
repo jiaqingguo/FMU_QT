@@ -17,6 +17,7 @@
 #include "qexcel.h"
 
 
+
 Widget* g_pWidget = NULL;
 
 Widget::Widget(QWidget *parent)
@@ -56,6 +57,7 @@ Widget::Widget(QWidget *parent)
     m_graphDialog = new graphDialog();
     //m_graphDialog->setupPlot();
    // m_graphDialog->show();
+       // 创建QProcess对象
 
 }
 
@@ -73,7 +75,7 @@ void Widget::slot_fmu_thread_finished(int tab, const std::vector<double> vecOutp
 
 void Widget::slot_tab_changed(int index)
 {
-    if (m_curve_show_dialog->isVisible())
+    if (m_graphDialog->isVisible())
     {
         QWidget* pWidget = ui->tabWidget->widget(index);
         operstionWidget* pOperstionWidget = dynamic_cast<operstionWidget*>(pWidget);
@@ -292,7 +294,7 @@ bool Widget::load_xml_configuration()
                 if (node.isElement())
                 {
                     QDomElement element_port = node.toElement();
-
+                 
                     QString strType = element_port.tagName();
                     QString strName = element_port.attribute("name");                   //获取sex属性值
                     QString strValueReference = element_port.attribute("valueReference");
