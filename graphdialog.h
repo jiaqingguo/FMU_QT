@@ -16,7 +16,7 @@ class graphDialog : public QDialog
 public:
     explicit graphDialog(QWidget *parent = nullptr);
     ~graphDialog();
-    void setDataShow(const QString& title, const int paiNum, const QMap<int, QVector<double>> mapData);
+    void setDataShow(const QString& title, const int paiNum, const QMap<int, QVector<double>> &mapData);
     void setupPlot();
    
 
