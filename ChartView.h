@@ -8,8 +8,7 @@
 class ChartView : public QtCharts::QChartView
 {
 public:
-    ChartView();
-
+     ChartView();
       // 保存坐标区域，用于复位
      void saveAxisRange();
  
@@ -20,8 +19,6 @@ public:
      void wheelEvent(QWheelEvent *event);
      //void keyPressEvent(QKeyEvent *event);
      //void keyReleaseEvent(QKeyEvent *event);
- 
-
  
  private:
      QPoint m_lastPoint;

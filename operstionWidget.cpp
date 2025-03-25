@@ -19,7 +19,6 @@ QMap<int,QVector<QString>> operstionWidget::m_mapOutputPort={}; //输出端口;
 std::map<int,std::map<int,std::vector<double>>> operstionWidget::m_mapAllOutputData={};
 
 
-
 operstionWidget::operstionWidget(const int num,QWidget *parent) :m_iAlgorithmNum(num),
     QWidget(parent),
     ui(new Ui::operstionWidget)
@@ -683,19 +682,19 @@ void operstionWidget::use_fmu_caculate()
     // 传给算法;
     //std::string exe_config_paths = "D:\\CS\\atspaceMicroTimer.fmu";//m_fileInfo.filePath().toStdString();
     std::string exe_config_paths = m_fileInfo.absoluteFilePath().toStdString(); 
-    //std::string exe_config_paths = m_fileInfo.absoluteFilePath().toLocal8Bit().constData();
-   const std::string fmu_path = string_To_UTF8(exe_config_paths); 
-     // const std::string fmu_path = UTF8_To_string(exe_config_paths);
+   
+  //  const std::string fmu_path = string_To_UTF8(exe_config_paths); 
+    const std::string fmu_path =QTextCodec::codecForName("gb18030")->fromUnicode(m_fileInfo.absoluteFilePath()).data();
 
    /* fmi2::fmu fmu(fmu_path);
     auto cs_fmu = fmu.as_cs_fmu();
     auto md = cs_fmu->get_model_description();
     auto slave1 = cs_fmu->new_instance();
-    slave1->setup_experiment();
-    slave1->enter_initialization_mode();
-    slave1->exit_initialization_mode();*/
+    m_pSlvae->setup_experiment();
+    m_pSlvae->enter_initialization_mode();
+    m_pSlvae->exit_initialization_mode();*/
 
-
+   
     std::vector<fmi2Real> wef(m_vecInputValueReference.size());
     std::vector<fmi2Real> ref(m_vecOutputValueReference.size());
 
@@ -726,6 +725,7 @@ void operstionWidget::use_fmu_caculate()
 
     if (!m_pSlvae->read_real(m_vecOutputValueReference, ref))
     {
+        int a;
         return;
     }
 
@@ -904,7 +904,8 @@ void operstionWidget::slot_btnChooseFile()
     }
 
     std::string exe_config_paths = m_fileInfo.absoluteFilePath().toStdString();
-    const std::string fmu_path = string_To_UTF8(exe_config_paths);
+  //  const std::string fmu_path = string_To_UTF8(exe_config_paths);
+    const std::string fmu_path = QTextCodec::codecForName("gb18030")->fromUnicode(m_fileInfo.absoluteFilePath()).data();
 
     m_pFmu = new  fmi2::fmu(fmu_path);
 
