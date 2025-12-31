@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- FMI 2.0 模型描述文件 - 定义FMU的元数据和变量结构 -->
+<fmiModelDescription
+    fmiVersion="2.0"                <!-- FMI标准版本（固定为2.0） -->
+    modelName="Test5"               <!-- FMU模型名称（在Wizard的"Basic Settings"页面设置） -->
+    guid="{d19c22c0-275f-11eb-a623-f0761c781221}"  <!-- 全局唯一标识符（自动生成） -->
+    version="1.0.0"                 <!-- 模型版本（Wizard中"Version Info"设置） -->
+    author="not specified"          <!-- 作者信息 -->
+    copyright="not specified"       <!-- 版权信息 -->
+    license="not specified"         <!-- 许可证类型 -->
+    description=""                  <!-- 模型描述 -->
+    generationTool="ghorwin/FMICodeGenerator@github - C++ Code using FMI support functions from IBK@TU Dresden"  <!-- 生成工具标识 -->
+    generationDateAndTime="2020-11-15T05:30:05Z"  <!-- 生成时间戳（自动填充） -->
+    variableNamingConvention="structured"  <!-- 变量命名规范（Wizard选项：flat/structured） -->
+    numberOfEventIndicators="0">    <!-- 事件指示器数量（Wizard中"Advanced"设置） -->
+
+    <!-- ************ 模型交换配置 ************ -->
+    <ModelExchange
+        modelIdentifier="Test5"     <!-- 动态库标识符（默认同modelName） -->
+        completedIntegratorStepNotNeeded="true"  <!-- 不需要完成步回调（Wizard中"ME Options"勾选） -->
+        canNotUseMemoryManagementFunctions="true"  <!-- 禁用内存管理函数 -->
+        canGetAndSetFMUstate="true" <!-- 支持状态保存/恢复（Wizard中"State Serialization"启用） -->
+        canSerializeFMUstate="true" <!-- 支持状态序列化 -->
+    />
+
+    <!-- ************ 协同仿真配置 ************ -->
+    <CoSimulation
+        modelIdentifier="Test5"     <!-- 必须与ModelExchange一致 -->
+        canHandleVariableCommunicationStepSize="true"  <!-- 支持变步长（Wizard中"CoSim Options"勾选） -->
+        canInterpolateInputs="false"  <!-- 不支持输入插值 -->
+        maxOutputDerivativeOrder="0"  <!-- 最大输出导数阶数（0-2，Wizard下拉选择） -->
+        canNotUseMemoryManagementFunctions="true"  
+        canGetAndSetFMUstate="true"
+        canSerializeFMUstate="true"
+    />
+
+    <!-- ************ 日志分类 ************ -->
+    <LogCategories>
+        <!-- Wizard中"Logging Categories"可添加/删除分类 -->
+        <Category name="logStatusWarning" />  <!-- 警告日志 -->
+        <Category name="logStatusError" />    <!-- 错误日志 -->
+        <Category name="logAll" />            <!-- 全部日志 -->
+        <Category name="logFmi2Call" />       <!-- FMI调用跟踪 -->
+    </LogCategories>
+
+    <!-- ************ 默认实验配置 ************ -->
+    <DefaultExperiment 
+        startTime="0.0"           <!-- 起始时间（Wizard中"Default Experiment"设置） -->
+        stopTime="10.0"           <!-- 终止时间 -->
+        tolerance="1e-06"/>       <!-- 求解器容差 -->
+
+    <!-- ************ 模型变量定义 ************ -->
+    <ModelVariables>
+        <!-- 变量1：字符串参数 -->
+        <ScalarVariable
+            name="ResultRootDir"   <!-- 变量名（Wizard中"Variables"页面定义） -->
+            description="可写目录路径"  <!-- 变量描述 -->
+            valueReference="42"    <!-- 值引用ID（自动分配） -->
+            variability="fixed"    <!-- 可变性类型（Wizard下拉选项：
+                                    - fixed: 固定参数
+                                    - tunable: 可调参数
+                                    - continuous: 连续变化
+                                    - discrete: 离散变化 -->
+            causality="parameter"  <!-- 因果关系（Wizard下拉选项：
+                                    - parameter: 参数
+                                    - input: 输入
+                                    - output: 输出
+                                    - local: 局部变量 -->
+            initial="exact">      <!-- 初始化要求（Wizard下拉选项：
+                                    - exact: 必须提供精确值
+                                    - approx: 可近似
+                                    - calculated: 计算得到 -->
+            <String start="C:\Users\..."/>  <!-- 初始值 -->
+        </ScalarVariable>
+
+        <!-- 变量2：实数输入 -->
+        <ScalarVariable
+            name="TW"
+            valueReference="1"
+            variability="continuous"  <!-- 连续变量 -->
+            causality="input"         <!-- 输入变量 -->
+            initial="approx">         <!-- 允许近似初始化 -->
+            <Real start="25" unit="C"/>  <!-- 带单位的实数（单位在Wizard中可选） -->
+        </ScalarVariable>
+
+        <!-- 变量3：实数输出 -->
+        <ScalarVariable
+            name="EnergySourceOut"
+            valueReference="2"
+            variability="discrete"     <!-- 离散变化 -->
+            causality="output"         <!-- 输出变量 -->
+            initial="exact">           <!-- 需要精确初始值 -->
+            <Real start="600000" unit="J/m3s"/>
+        </ScalarVariable>
+    </ModelVariables>
+
+    <!-- ************ 模型结构定义 ************ -->
+    <ModelStructure>
+        <Outputs>
+            <!-- 定义输出变量的依赖关系 -->
+            <Unknown index="3" dependencies="2 4"/>  <!-- Wizard中"Dependencies"页面设置 -->
+            <!-- dependencyKind可选（在Wizard高级设置中配置）：
+                - dependent: 常规依赖
+                - constant: 固定系数依赖
+                - parameter: 参数依赖 -->
+        </Outputs>
+    </ModelStructure>
+</fmiModelDescription>
