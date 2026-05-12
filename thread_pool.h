@@ -13,6 +13,7 @@ using namespace fmi4cpp::fmi2;
 
 
 class fum_thread;
+
 class thread_pool : public QObject
 {
     Q_OBJECT
