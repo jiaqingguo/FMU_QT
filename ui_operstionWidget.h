@@ -36,6 +36,7 @@ public:
     QGroupBox *groupBox_input;
     QVBoxLayout *verticalLayout_3;
     QHBoxLayout *horizontalLayout_2;
+    QPushButton *btn_import;
     QPushButton *btn_clear_input;
     QSpacerItem *horizontalSpacer_2;
     QHBoxLayout *horizontalLayout_5;
@@ -94,6 +95,11 @@ public:
         verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
         horizontalLayout_2 = new QHBoxLayout();
         horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
+        btn_import = new QPushButton(groupBox_input);
+        btn_import->setObjectName(QString::fromUtf8("btn_import"));
+
+        horizontalLayout_2->addWidget(btn_import);
+
         btn_clear_input = new QPushButton(groupBox_input);
         btn_clear_input->setObjectName(QString::fromUtf8("btn_clear_input"));
 
@@ -196,6 +202,7 @@ public:
         label_algorithm->setText(QString());
         btn_choose->setText(QCoreApplication::translate("operstionWidget", "\351\200\211\346\213\251", nullptr));
         groupBox_input->setTitle(QCoreApplication::translate("operstionWidget", "\350\276\223\345\205\245", nullptr));
+        btn_import->setText(QCoreApplication::translate("operstionWidget", "\345\257\274\345\205\245\350\276\223\345\205\245\351\205\215\347\275\256", nullptr));
         btn_clear_input->setText(QCoreApplication::translate("operstionWidget", "\346\270\205\347\251\272\350\276\223\345\205\245", nullptr));
         groupBox_output->setTitle(QCoreApplication::translate("operstionWidget", "\350\276\223\345\207\272", nullptr));
         btn_calculate->setText(QCoreApplication::translate("operstionWidget", "\346\211\247\350\241\214\350\256\241\347\256\227", nullptr));

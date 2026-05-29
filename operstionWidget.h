@@ -69,6 +69,8 @@ public:
 private:
 
     void load_tableWidget_show();
+
+    void load_tableWidget_input_show(const QMap<QString, double> inputMap);
     void use_fmu_caculate();
 
    
@@ -80,6 +82,8 @@ signals:
 public slots:
     void slot_btnCalculate();
     void slot_btnClear();
+
+    void slot_btnImport();
 private slots:
     void slot_btnChooseFile();
     void slot_tableWigdetCheckedChanged(int row, int col);

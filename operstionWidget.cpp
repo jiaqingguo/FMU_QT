@@ -24,6 +24,7 @@ operstionWidget::operstionWidget(const int num,QWidget *parent) :m_iAlgorithmNum
     ui(new Ui::operstionWidget)
 {
     ui->setupUi(this);
+    m_fileInfo.setFile("");
   
     ui->tableWidget_input->setRowCount(2);
     ui->tableWidget_input->setVerticalHeaderLabels(QStringList() << QStringLiteral("端口 ") << QStringLiteral("数值 "));
@@ -45,6 +46,7 @@ operstionWidget::operstionWidget(const int num,QWidget *parent) :m_iAlgorithmNum
    // connect(ui->tableWidget_output, SIGNAL(cellChanged(int ,int )), this, SLOT(slot_tableWigdetCheckedChanged(int , int )));
     connect(ui->btn_calculate,&QPushButton::clicked,this,&operstionWidget::slot_btnCalculate);
     connect(ui->btn_clear,&QPushButton::clicked,this,&operstionWidget::slot_btnClear);
+    connect(ui->btn_import, &QPushButton::clicked, this, &operstionWidget::slot_btnImport);
     connect(ui->btn_curve_show,&QPushButton::clicked,this,&operstionWidget::slot_btnCurveShow);
     connect(ui->comboBox_countShow,SIGNAL(currentIndexChanged(int)),this,SLOT(slot_comboxPaiNumChanged(int)));
 
@@ -662,6 +664,22 @@ void operstionWidget::load_tableWidget_show()
    
 }
 
+void operstionWidget::load_tableWidget_input_show(const QMap<QString, double> inputMap)
+{
+    for (auto it = inputMap.begin(); it != inputMap.end(); it++)
+    {
+        for (int i = 0; i < m_vecInputPort.size(); i++)
+        {
+            if (m_vecInputPort[i] == it.key())
+            {
+                ui->tableWidget_input->item(1, i)->setText(QString::number(it.value()));
+                break;
+            }
+        }
+    }
+    
+}
+
 void operstionWidget::use_fmu_caculate()
 {
     //传入输出；
@@ -1055,6 +1073,74 @@ void operstionWidget::slot_btnClear()
             pItem->setText("");
         }
     }
+}
+
+// 导入输入数据配置
+void operstionWidget::slot_btnImport()
+{
+
+    if (m_fileInfo.fileName().isEmpty())
+    {
+        QMessageBox::critical(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("请先选择FMU文件!"));
+        return;
+    }
+    QMap<QString, double> inputMap;
+
+    // 打开文件选择对话框
+    QString fileName = QFileDialog::getOpenFileName(nullptr,
+        "选择XML输入文件",
+        "",
+        "XML Files (*.xml)");
+
+    if (fileName.isEmpty()) {
+        qDebug() << "未选择文件";
+        //return inputMap;
+    }
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly)) {
+        qDebug() << "无法打开文件:" << fileName;
+       // return inputMap;
+    }
+
+    QXmlStreamReader xml(&file);
+
+    while (!xml.atEnd() && !xml.hasError()) {
+        QXmlStreamReader::TokenType token = xml.readNext();
+
+        if (token == QXmlStreamReader::StartElement) {
+            if (xml.name() == "Input") {
+                QXmlStreamAttributes attributes = xml.attributes();
+
+                QString name = attributes.value("name").toString();
+                QString valueStr = attributes.value("value").toString();
+
+                if (!name.isEmpty() && !valueStr.isEmpty()) {
+                    bool ok;
+                    double value = valueStr.toDouble(&ok);
+                    if (ok) {
+                        inputMap[name] = value;
+                        qDebug() << "读取成功:" << name << "=" << value;
+                    }
+                    else {
+                        qDebug() << "值转换失败:" << name << "=" << valueStr;
+                    }
+                }
+            }
+        }
+    }
+
+    if (xml.hasError()) {
+        qDebug() << "XML解析错误:" << xml.errorString();
+    }
+
+    file.close();
+    qDebug() << "共读取" << inputMap.size() << "个有效输入";
+
+
+    std::thread thread_(&operstionWidget::load_tableWidget_input_show, this,inputMap);
+
+    thread_.detach();
 }
 
 void operstionWidget::slot_btnCurveShow()

@@ -79,6 +79,13 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
+         <widget class="QPushButton" name="btn_import">
+          <property name="text">
+           <string>导入输入配置</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="btn_clear_input">
           <property name="text">
            <string>清空输入</string>
