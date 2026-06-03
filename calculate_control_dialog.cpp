@@ -32,6 +32,44 @@ void calculate_control_dialog::reset_btns()
     ui->btn_pause->setEnabled(false);
     ui->btn_stop->setEnabled(false);
 }
+void calculate_control_dialog::setShow(int flag, int count, int cycleTime)
+{
+    ui->spinBox_CycleTime->setValue(cycleTime);
+    ui->spinBox->setValue(count);
+    if (flag == 1)
+    {
+       /* ui->btn_start->setChecked(false);
+        ui->btn_start->setEnabled(false);
+        ui->btn_pause->setEnabled(true);
+        ui->btn_stop->setEnabled(true);
+        emit signal_calculate_control(1, count, cycleTime);*/
+        ui->btn_start->click();
+    }
+    else if (flag == 2)
+    {
+        /*if (ui->btn_pause->isChecked())
+        {
+            ui->btn_pause->setText(QString::fromLocal8Bit("¼ÌÐø"));
+            emit signal_calculate_control(2, ui->spinBox->value(), 0);
+        }
+        else
+        {
+            ui->btn_pause->setText(QString::fromLocal8Bit("ÔÝÍ£"));
+            emit signal_calculate_control(3, ui->spinBox->value(), 0);
+        }*/
+        ui->btn_pause->click();
+    }
+    else if (flag == 3)
+    {
+        /*ui->btn_start->setEnabled(true);
+        ui->btn_pause->setEnabled(false);
+        ui->btn_pause->setText(QString::fromLocal8Bit("ÔÝÍ£"));
+        ui->btn_pause->setChecked(false);
+        ui->btn_stop->setEnabled(false);
+        emit signal_calculate_control(0, ui->spinBox->value(), 0);*/
+        ui->btn_stop->click();
+    }
+}
 void calculate_control_dialog::slot_btn_start()
 {
     int time_cycle = ui->spinBox_CycleTime->value();

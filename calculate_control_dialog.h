@@ -16,6 +16,8 @@ public:
     ~calculate_control_dialog();
 
     void reset_btns();
+
+    void setShow(int flag, int count, int cycleTime);
 signals:
     void signal_calculate_control(int flag,int count, int cycleTime);
 public slots:

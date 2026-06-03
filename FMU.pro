@@ -1,4 +1,4 @@
-QT       += core gui gui-private xml charts axcontainer printsupport
+QT       += core gui gui-private xml charts axcontainer printsupport network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -19,6 +19,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     ChartView.cpp \
     Logger.cpp \
+    UdpClientManager.cpp \
     addValueDialog.cpp \
     appkey.cpp \
     calculate_control_dialog.cpp \
@@ -36,6 +37,7 @@ SOURCES += \
 HEADERS += \
     ChartView.h \
     Logger.h \
+    UdpClientManager.h \
     addValueDialog.h \
     appkey.h \
     calculate_control_dialog.h \

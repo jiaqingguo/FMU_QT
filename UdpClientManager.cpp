@@ -1,0 +1,71 @@
+﻿#include "UdpClientManager.h"
+
+//#include <QThreadPool>
+#include <QDebug>
+
+
+UdpClientManager::UdpClientManager(QObject *parent)
+	: QObject(parent)
+	, m_udpSocket(0)
+{
+
+}
+
+UdpClientManager::~UdpClientManager()
+{
+	if (m_udpSocket)
+		m_udpSocket->deleteLater();
+}
+
+void UdpClientManager::startListen(const QString &ip, int port)
+{
+	m_udpSocket = new QUdpSocket(this);
+	connect(m_udpSocket,SIGNAL(readyRead()),this,SLOT(processPendingDatagrams()));
+
+	m_udpSocket->bind(QHostAddress(ip), port);
+}
+
+void UdpClientManager::startListen(int port)
+{
+	m_udpSocket = new QUdpSocket(this);
+	connect(m_udpSocket, SIGNAL(readyRead()), this, SLOT(processPendingDatagrams()));
+
+	bool ret= m_udpSocket->bind(QHostAddress::Any, port);
+	if (ret)
+	{
+		qDebug() << "udp bind success!!!!";
+	}
+	else
+	{
+		qDebug() << "udp bind failed!!!!!!!!!!!!!!!!";
+
+	}
+}
+
+void UdpClientManager::sendData(const QByteArray& datagram, const QHostAddress& host, quint16 port)
+{
+	m_udpSocket->writeDatagram(datagram, host, port);
+}
+
+void UdpClientManager::processPendingDatagrams()
+{
+	while(m_udpSocket->hasPendingDatagrams())
+	{
+		QByteArray datagram;
+		datagram.resize(m_udpSocket->pendingDatagramSize());
+		//m_udpSocket->readDatagram(datagram.data(),datagram.size());
+		QHostAddress srcAddress;
+		quint16 srcPort;
+		m_udpSocket->readDatagram(datagram.data(), datagram.size(), &srcAddress, &srcPort);
+
+		qDebug() << "udp recv:" << srcAddress << srcPort;
+		qDebug() << datagram;
+		sendData(datagram, srcAddress, srcPort);
+		emit msgRecevied(datagram);
+
+		//在子线程中处理数据
+		//UdpDataTask *dataTask = new UdpDataTask(datagram,conditionList.last());
+		//QThreadPool::globalInstance()->start(dataTask);
+	}
+}
+

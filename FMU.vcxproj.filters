@@ -43,6 +43,9 @@
     <ClCompile Include="Logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UdpClientManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="addValueDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -87,6 +90,9 @@
     <ClInclude Include="Logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <CustomBuild Include="UdpClientManager.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="addValueDialog.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -122,6 +128,12 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="debug\moc_UdpClientManager.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="release\moc_UdpClientManager.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
     <ClCompile Include="debug\moc_addValueDialog.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>

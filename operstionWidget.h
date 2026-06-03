@@ -30,6 +30,10 @@ class operstionWidget : public QWidget
 public:
     explicit operstionWidget(const int num,QWidget *parent = nullptr);
     ~operstionWidget();
+
+    //判断是可用的;
+    bool is_available();
+   
     std::vector<double> get_tableWidgetInput();
    // void set_tableWidgetOutput()
     std::string  get_fmm_file_path();

@@ -14,6 +14,7 @@ QT_END_NAMESPACE
 
 class thread_pool;
 class QExcel;
+class UdpClientManager;
 
 class Widget : public QWidget
 {
@@ -35,6 +36,7 @@ public:
    // curveShowDialog* get_curve_ptr();
     graphDialog* getGraphDialog();
     QExcel* get_execl_ptr();
+    void init_udp();
 protected:
     void closeEvent(QCloseEvent* event);
 private slots:
@@ -56,6 +58,8 @@ private slots:
     void slot_fmu_thread_finished(int tab, const  std::vector<double> vecOutputValue);
 
     void slot_tab_changed(int index);
+
+    void slot_udp_recv_data(const QByteArray& udpData);
 private:
     Ui::Widget *ui;
     int m_iAlgorithmNum=0;
@@ -67,6 +71,8 @@ private:
     curveShowDialog* m_curve_show_dialog = nullptr;
     graphDialog* m_graphDialog = nullptr;
     QExcel* m_qexecl;
+
+    UdpClientManager* m_pUdpClientManager = nullptr;
 };
 
 extern Widget* g_pWidget;

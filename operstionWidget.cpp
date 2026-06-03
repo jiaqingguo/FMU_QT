@@ -66,6 +66,11 @@ operstionWidget::~operstionWidget()
     m_mapAllOutputData.erase(m_iAlgorithmNum);
 }
 
+bool operstionWidget::is_available()
+{
+    return !m_fileInfo.fileName().isEmpty();
+}
+
 std::vector<double> operstionWidget::get_tableWidgetInput()
 {
     std::vector<double> vecDoule;
