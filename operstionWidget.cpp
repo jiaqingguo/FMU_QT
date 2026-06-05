@@ -3,6 +3,9 @@
 #include <fstream>
 #include <QFile>
 #include <qmessagebox.h>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 #include "QtGui/private/qzipreader_p.h"
 #include "operstionWidget.h"
@@ -11,6 +14,7 @@
 #include "curveShowDialog.h"
 #include "widget.h"
 #include "qexcel.h"
+#include "UdpClientManager.h"
 
 
 QMap<int, QMap<int, QMap<int, int>>> operstionWidget::m_mapRelevance = { };
@@ -884,6 +888,69 @@ void operstionWidget::update_prot_data(QMap<int, double> portData)
 
 
 
+void operstionWidget::sendFmuSelectedViaUdp()
+{
+    if (g_pWidget == nullptr)
+        return;
+    UdpClientManager* pUdp = g_pWidget->getUdpClientManager();
+    if (pUdp == nullptr)
+        return;
+
+    QJsonObject json;
+    json["type"] = QStringLiteral("fmu_selected");
+    json["algorithmNum"] = m_iAlgorithmNum;
+    json["fileName"] = m_fileInfo.fileName();
+
+    QJsonArray inputPorts;
+    for (const auto& port : m_vecInputPort)
+        inputPorts.append(port);
+    json["inputPorts"] = inputPorts;
+
+    QJsonArray outputPorts;
+    if (m_mapOutputPort.contains(m_iAlgorithmNum))
+    {
+        for (const auto& port : m_mapOutputPort[m_iAlgorithmNum])
+            outputPorts.append(port);
+    }
+    json["outputPorts"] = outputPorts;
+
+    QJsonDocument doc(json);
+    QByteArray data = doc.toJson(QJsonDocument::Compact);
+    pUdp->sendData(data, QHostAddress("192.168.0.147"), 8818);
+}
+
+void operstionWidget::sendCalculateResultViaUdp(const std::vector<double>& vecOutputValue)
+{
+    if (g_pWidget == nullptr)
+        return;
+    UdpClientManager* pUdp = g_pWidget->getUdpClientManager();
+    if (pUdp == nullptr)
+        return;
+
+    QJsonObject json;
+    json["type"] = QStringLiteral("fmu_calculate");
+    json["algorithmNum"] = m_iAlgorithmNum;
+    json["fileName"] = m_fileInfo.fileName();
+
+    QJsonArray inputValues;
+    for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
+    {
+        auto pItem = ui->tableWidget_input->item(1, i);
+        inputValues.append(pItem ? pItem->text().toDouble() : 0.0);
+    }
+    json["inputValues"] = inputValues;
+
+    QJsonArray outputValues;
+    for (const auto& val : vecOutputValue)
+        outputValues.append(val);
+    json["outputValues"] = outputValues;
+
+    QJsonDocument doc(json);
+    QByteArray data = doc.toJson(QJsonDocument::Compact);
+    pUdp->sendData(data, QHostAddress("192.168.0.147"), 8818);
+}
+
+
 void operstionWidget::slot_btnChooseFile()
 {
     
@@ -938,6 +1005,8 @@ void operstionWidget::slot_btnChooseFile()
     m_pSlvae->setup_experiment();
     m_pSlvae->enter_initialization_mode();
     m_pSlvae->exit_initialization_mode();
+
+    sendFmuSelectedViaUdp();
 }
 
 void operstionWidget::slot_tableWigdetCheckedChanged(int row, int col)
@@ -1063,6 +1132,9 @@ void operstionWidget::slot_btnCalculate()
    
 
     get_relevacne_port_data();
+
+    auto vecOutput = m_mapAllOutputData[m_iAlgorithmNum][m_iCalculateCount];
+    sendCalculateResultViaUdp(vecOutput);
 }
 
 void operstionWidget::slot_btnClear()

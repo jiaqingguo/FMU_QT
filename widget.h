@@ -36,6 +36,7 @@ public:
    // curveShowDialog* get_curve_ptr();
     graphDialog* getGraphDialog();
     QExcel* get_execl_ptr();
+    UdpClientManager* getUdpClientManager();
     void init_udp();
 protected:
     void closeEvent(QCloseEvent* event);
@@ -66,7 +67,7 @@ private:
     calculate_control_dialog* m_calculate_control_dialog;
     int m_iThreadCount = 10;
 
-    thread_pool* m_pThread_pool;			// Ïß³Ì³Ø¶ÔÏó
+    thread_pool* m_pThread_pool;			// ï¿½ß³Ì³Ø¶ï¿½ï¿½ï¿½
 
     curveShowDialog* m_curve_show_dialog = nullptr;
     graphDialog* m_graphDialog = nullptr;

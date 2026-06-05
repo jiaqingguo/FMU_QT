@@ -143,6 +143,8 @@ void Widget::update_algorithhnum_opersition(const int& tab, const std::vector<do
 
         // 更新关联端口;
         pOperstionWidget->combine_relevacne_port_data(vecOutputValue);
+
+        pOperstionWidget->sendCalculateResultViaUdp(vecOutputValue);
     }
 }
 
@@ -190,6 +192,11 @@ graphDialog* Widget::getGraphDialog()
 QExcel* Widget::get_execl_ptr()
 {
     return m_qexecl;
+}
+
+UdpClientManager* Widget::getUdpClientManager()
+{
+    return m_pUdpClientManager;
 }
 
 void Widget::init_udp()

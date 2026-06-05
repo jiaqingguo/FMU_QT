@@ -47,6 +47,12 @@ void UdpClientManager::sendData(const QByteArray& datagram, const QHostAddress& 
 	m_udpSocket->writeDatagram(datagram, host, port);
 }
 
+void UdpClientManager::sendData(const QByteArray& datagram)
+{
+	if (m_lastSenderPort != 0)
+		m_udpSocket->writeDatagram(datagram, m_lastSenderAddress, m_lastSenderPort);
+}
+
 void UdpClientManager::processPendingDatagrams()
 {
 	while(m_udpSocket->hasPendingDatagrams())
@@ -58,9 +64,12 @@ void UdpClientManager::processPendingDatagrams()
 		quint16 srcPort;
 		m_udpSocket->readDatagram(datagram.data(), datagram.size(), &srcAddress, &srcPort);
 
+		//m_lastSenderAddress = srcAddress;
+		//m_lastSenderPort = srcPort;
+
 		qDebug() << "udp recv:" << srcAddress << srcPort;
 		qDebug() << datagram;
-		sendData(datagram, srcAddress, srcPort);
+		//sendData(datagram, srcAddress, srcPort);
 		emit msgRecevied(datagram);
 
 		//在子线程中处理数据

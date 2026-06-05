@@ -70,6 +70,9 @@ public:
 
     bool is_curve_show_dialog();
     void update_curve_show_dialog();
+
+    void sendFmuSelectedViaUdp();
+    void sendCalculateResultViaUdp(const std::vector<double>& vecOutputValue);
 private:
 
     void load_tableWidget_show();
