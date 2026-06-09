@@ -3,6 +3,10 @@
 #include <QTextStream>
 #include <QFileDialog>
 #include <QTabBar>
+#include <QSettings>
+#include <QDir>
+#include <QCoreApplication>
+#include <QFile>
 
 #include <qdebug.h>
 
@@ -201,48 +205,34 @@ UdpClientManager* Widget::getUdpClientManager()
 
 void Widget::init_udp()
 {
+    QString iniPath = QCoreApplication::applicationDirPath() + "/config.ini";
+    int listenPort = 36520;
+    QString targetIp;
+    int targetPort = 0;
+
+    if (QFile::exists(iniPath))
+    {
+        QSettings settings(iniPath, QSettings::IniFormat);
+        listenPort = settings.value("Udp/ListenPort", 36520).toInt();
+        targetIp = settings.value("Udp/TargetIp", "").toString();
+        targetPort = settings.value("Udp/TargetPort", 0).toInt();
+        qDebug() << "read config.ini: ListenPort=" << listenPort
+                 << "TargetIp=" << targetIp << "TargetPort=" << targetPort;
+    }
+    else
+    {
+        qDebug() << "config.ini not found, using defaults";
+    }
+
     m_pUdpClientManager = new UdpClientManager;
-    m_pUdpClientManager->startListen(36520);
+    m_pUdpClientManager->startListen(listenPort);
 
-    //QHostAddress local_ip = QHostAddress("192.168.0.129");
-    //int  local_port = 56660;  // 本地端口号
-    //m_pUdpClientManager->sendData("发送测试", local_ip, local_port);
+    if (!targetIp.isEmpty() && targetPort > 0)
+    {
+        m_pUdpClientManager->setTarget(QHostAddress(targetIp), targetPort);
+    }
+
     QObject::connect(m_pUdpClientManager, &UdpClientManager::msgRecevied,this,&Widget::slot_udp_recv_data);
-    //QObject::connect(m_pUdpClientManager, &UdpClientManager::msgRecevied,
-    //    [this](const QByteArray& message)
-    //    {
-    //        QString str = QString::fromUtf8(message);
-    //        qDebug() << " udp recv str : " << str;
-    //        // QDataStream stream(message);  // 使用 QByteArray 创建 QDataStream
-    //        QDataStream stream(message);
-    //        stream.setByteOrder(QDataStream::LittleEndian); // 设置为小端序
-    //        stream.setVersion(QDataStream::Qt_5_0);  // 设置 QDataStream 版本
-
-    //        stPlcData data;
-    //        stream >> data.Q1;
-    //        stream >> data.Q2;
-    //        stream >> data.M;
-    //        for (int i = 0; i < 7; i++) {
-    //            stream >> data.P[i];
-    //        }
-
-
-
-    //        QByteArray byteArray;
-    //        QDataStream dataStream(&byteArray, QIODevice::WriteOnly);
-
-    //        // 将自定义结构体的属性写入QDataStream
-    //        dataStream << data.Q1 << data.Q2 << data.M;
-    //        for (int i = 0; i < 7; i++) {
-    //            stream << data.P[i];
-    //        }
-
-    //        //QHostAddress local_ip = QHostAddress::LocalHost;
-    //        //    int  local_port = 56660;  // 本地端口号
-
-    //        //    m_pUdpClientManager->sendData(message, local_ip, local_port);
-
-    //    });
 }
 
 void Widget::closeEvent(QCloseEvent* event)

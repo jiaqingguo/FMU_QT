@@ -49,8 +49,14 @@ void UdpClientManager::sendData(const QByteArray& datagram, const QHostAddress& 
 
 void UdpClientManager::sendData(const QByteArray& datagram)
 {
-	if (m_lastSenderPort != 0)
-		m_udpSocket->writeDatagram(datagram, m_lastSenderAddress, m_lastSenderPort);
+	if (m_targetPort != 0)
+		m_udpSocket->writeDatagram(datagram, m_targetAddress, m_targetPort);
+}
+
+void UdpClientManager::setTarget(const QHostAddress& host, quint16 port)
+{
+	m_targetAddress = host;
+	m_targetPort = port;
 }
 
 void UdpClientManager::processPendingDatagrams()

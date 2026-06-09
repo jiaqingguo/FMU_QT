@@ -20,11 +20,13 @@ public:
 
 	void sendData(const QByteArray& datagram, const QHostAddress& host, quint16 port);
 	void sendData(const QByteArray& datagram);
+
+	void setTarget(const QHostAddress& host, quint16 port);
 private:
 	//
 	QUdpSocket* m_udpSocket;
-	QHostAddress m_lastSenderAddress;
-	quint16 m_lastSenderPort = 0;
+	QHostAddress m_targetAddress;
+	quint16 m_targetPort = 0;
 
 private slots:
 	//接收服务器传来的数据
