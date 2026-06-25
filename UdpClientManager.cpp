@@ -45,12 +45,27 @@ void UdpClientManager::startListen(int port)
 void UdpClientManager::sendData(const QByteArray& datagram, const QHostAddress& host, quint16 port)
 {
 	m_udpSocket->writeDatagram(datagram, host, port);
+	if (!m_bWarmedUp)
+	{
+		m_bWarmedUp = true;
+		m_udpSocket->writeDatagram(datagram, host, port);
+	}
 }
 
-void UdpClientManager::sendData(const QByteArray& datagram)
+int UdpClientManager::sendData(const QByteArray& datagram)
 {
 	if (m_targetPort != 0)
-		m_udpSocket->writeDatagram(datagram, m_targetAddress, m_targetPort);
+	{
+		int Len = m_udpSocket->writeDatagram(datagram, m_targetAddress, m_targetPort);
+		if (!m_bWarmedUp)
+		{
+			m_bWarmedUp = true;
+			m_udpSocket->writeDatagram(datagram, m_targetAddress, m_targetPort);
+		}
+		qDebug() << "udp send len: " << Len;
+		return Len;
+	}
+	return 0;
 }
 
 void UdpClientManager::setTarget(const QHostAddress& host, quint16 port)

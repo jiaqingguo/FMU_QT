@@ -19,7 +19,7 @@ public:
 	void startListen(int port);
 
 	void sendData(const QByteArray& datagram, const QHostAddress& host, quint16 port);
-	void sendData(const QByteArray& datagram);
+	int sendData(const QByteArray& datagram);
 
 	void setTarget(const QHostAddress& host, quint16 port);
 private:
@@ -27,6 +27,7 @@ private:
 	QUdpSocket* m_udpSocket;
 	QHostAddress m_targetAddress;
 	quint16 m_targetPort = 0;
+	bool m_bWarmedUp = false;
 
 private slots:
 	//接收服务器传来的数据

@@ -232,6 +232,11 @@ void Widget::init_udp()
         m_pUdpClientManager->setTarget(QHostAddress(targetIp), targetPort);
     }
 
+    QByteArray warmup(1, 0);
+    m_pUdpClientManager->sendData(warmup, QHostAddress("192.168.0.147"), 8818);
+    if (!targetIp.isEmpty() && targetPort > 0)
+        m_pUdpClientManager->sendData(warmup, QHostAddress(targetIp), targetPort);
+
     QObject::connect(m_pUdpClientManager, &UdpClientManager::msgRecevied,this,&Widget::slot_udp_recv_data);
 }
 

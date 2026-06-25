@@ -6,6 +6,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QRandomGenerator>
 
 #include "QtGui/private/qzipreader_p.h"
 #include "operstionWidget.h"
@@ -51,6 +52,8 @@ operstionWidget::operstionWidget(const int num,QWidget *parent) :m_iAlgorithmNum
     connect(ui->btn_calculate,&QPushButton::clicked,this,&operstionWidget::slot_btnCalculate);
     connect(ui->btn_clear,&QPushButton::clicked,this,&operstionWidget::slot_btnClear);
     connect(ui->btn_import, &QPushButton::clicked, this, &operstionWidget::slot_btnImport);
+    connect(ui->btnFaultInput, &QPushButton::clicked, this, &operstionWidget::slot_btnFaultInput);
+    connect(ui->btnIsFault, &QPushButton::clicked, this, &operstionWidget::slot_btnIsFault);
     connect(ui->btn_curve_show,&QPushButton::clicked,this,&operstionWidget::slot_btnCurveShow);
     connect(ui->comboBox_countShow,SIGNAL(currentIndexChanged(int)),this,SLOT(slot_comboxPaiNumChanged(int)));
 
@@ -916,7 +919,7 @@ void operstionWidget::sendFmuSelectedViaUdp()
 
     QJsonDocument doc(json);
     QByteArray data = doc.toJson(QJsonDocument::Compact);
-    pUdp->sendData(data, QHostAddress("192.168.0.147"), 8818);
+    pUdp->sendData(data);
 }
 
 void operstionWidget::sendCalculateResultViaUdp(const std::vector<double>& vecOutputValue)
@@ -945,9 +948,29 @@ void operstionWidget::sendCalculateResultViaUdp(const std::vector<double>& vecOu
         outputValues.append(val);
     json["outputValues"] = outputValues;
 
+    QJsonArray faultFlags;
+    const auto& vecOutputPorts = m_mapOutputPort[m_iAlgorithmNum];
+    for (std::size_t i = 0; i < vecOutputValue.size(); i++)
+    {
+        int flag = 1;
+        if (i < (std::size_t)vecOutputPorts.size())
+        {
+            QString portName = vecOutputPorts[i];
+            if (m_mapFaultRange.contains(portName))
+            {
+                double min = m_mapFaultRange[portName].first;
+                double max = m_mapFaultRange[portName].second;
+                if (vecOutputValue[i] < min || vecOutputValue[i] > max)
+                    flag = 0;
+            }
+        }
+        faultFlags.append(flag);
+    }
+    json["faultFlags"] = faultFlags;
+
     QJsonDocument doc(json);
     QByteArray data = doc.toJson(QJsonDocument::Compact);
-    pUdp->sendData(data, QHostAddress("192.168.0.147"), 8818);
+   pUdp->sendData(data);
 }
 
 
@@ -1220,6 +1243,185 @@ void operstionWidget::slot_btnImport()
     thread_.detach();
 }
 
+void operstionWidget::slot_btnFaultInput()
+{
+    if (m_fileInfo.fileName().isEmpty())
+    {
+        QMessageBox::critical(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("请先选择FMU文件!"));
+        return;
+    }
+
+    QString fileName = QFileDialog::getOpenFileName(nullptr,
+        QString::fromLocal8Bit("选择故障输入XML文件"),
+        "",
+        "XML Files (*.xml)");
+
+    if (fileName.isEmpty())
+        return;
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "无法打开文件:" << fileName;
+        return;
+    }
+
+    QMap<QString, double> inputMap;
+    QXmlStreamReader xml(&file);
+
+    while (!xml.atEnd() && !xml.hasError())
+    {
+        QXmlStreamReader::TokenType token = xml.readNext();
+
+        if (token == QXmlStreamReader::StartElement)
+        {
+            if (xml.name() == "Input")
+            {
+                QXmlStreamAttributes attributes = xml.attributes();
+                QString name = attributes.value("name").toString();
+                QString valueStr = attributes.value("value").toString();
+
+                if (!name.isEmpty() && !valueStr.isEmpty())
+                {
+                    QStringList range = valueStr.split("/");
+                    if (range.size() == 2)
+                    {
+                        double min = range[0].toDouble();
+                        double max = range[1].toDouble();
+                        double randomValue = min + QRandomGenerator::global()->generateDouble() * (max - min);
+                        inputMap[name] = randomValue;
+                        qDebug() << "故障输入:" << name << "range:" << min << "-" << max << "value:" << randomValue;
+                    }
+                    else
+                    {
+                        bool ok;
+                        double value = valueStr.toDouble(&ok);
+                        if (ok)
+                        {
+                            inputMap[name] = value;
+                            qDebug() << "故障输入(固定值):" << name << "=" << value;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (xml.hasError())
+    {
+        qDebug() << "XML解析错误:" << xml.errorString();
+    }
+
+    file.close();
+    qDebug() << "共读取" << inputMap.size() << "个有效故障输入";
+
+    std::thread thread_(&operstionWidget::load_tableWidget_input_show, this, inputMap);
+    thread_.detach();
+}
+
+void operstionWidget::slot_btnIsFault()
+{
+    if (m_fileInfo.fileName().isEmpty())
+    {
+        QMessageBox::critical(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("请先选择FMU文件!"));
+        return;
+    }
+
+    QString fileName = QFileDialog::getOpenFileName(nullptr,
+        QString::fromLocal8Bit("选择故障范围XML文件"),
+        "",
+        "XML Files (*.xml)");
+
+    if (fileName.isEmpty())
+        return;
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "无法打开文件:" << fileName;
+        return;
+    }
+
+    m_mapFaultRange.clear();
+    QXmlStreamReader xml(&file);
+
+    while (!xml.atEnd() && !xml.hasError())
+    {
+        QXmlStreamReader::TokenType token = xml.readNext();
+
+        if (token == QXmlStreamReader::StartElement)
+        {
+            if (xml.name() == "Input")
+            {
+                QXmlStreamAttributes attributes = xml.attributes();
+                QString name = attributes.value("name").toString();
+                QString valueStr = attributes.value("value").toString();
+
+                if (!name.isEmpty() && !valueStr.isEmpty())
+                {
+                    QStringList range = valueStr.split("/");
+                    if (range.size() == 2)
+                    {
+                        double min = range[0].toDouble();
+                        double max = range[1].toDouble();
+                        m_mapFaultRange[name] = qMakePair(min, max);
+                        qDebug() << "故障范围:" << name << min << "-" << max;
+                    }
+                }
+            }
+        }
+    }
+
+    if (xml.hasError())
+        qDebug() << "XML解析错误:" << xml.errorString();
+
+    file.close();
+    qDebug() << "共读取" << m_mapFaultRange.size() << "个故障范围";
+
+    checkFaultRange();
+}
+
+void operstionWidget::checkFaultRange()
+{
+    if (m_mapFaultRange.isEmpty())
+        return;
+
+    QString strPaiNum = ui->comboBox_countShow->currentText();
+    if (strPaiNum.isEmpty())
+        return;
+
+    int iPaiNum = strPaiNum.toInt();
+    if (!m_mapAllOutputData[m_iAlgorithmNum].count(iPaiNum))
+        return;
+
+    const auto& vecOutput = m_mapAllOutputData[m_iAlgorithmNum][iPaiNum];
+    const auto& vecOutputPorts = m_mapOutputPort[m_iAlgorithmNum];
+
+    for (int i = 0; i < ui->tableWidget_output->columnCount() && i < (int)vecOutput.size(); i++)
+    {
+        auto pItem = ui->tableWidget_output->item(1, i);
+        if (!pItem)
+            continue;
+
+        QString portName = (i < vecOutputPorts.size()) ? vecOutputPorts[i] : "";
+        double value = vecOutput[i];
+
+        if (m_mapFaultRange.contains(portName))
+        {
+            double min = m_mapFaultRange[portName].first;
+            double max = m_mapFaultRange[portName].second;
+            if (value < min || value > max)
+                pItem->setBackground(QBrush(Qt::red));
+            else
+                pItem->setBackground(QBrush(Qt::white));
+        }
+        else
+        {
+            pItem->setBackground(QBrush(Qt::white));
+        }
+    }
+}
+
 void operstionWidget::slot_btnCurveShow()
 {
     m_setOutputIndex.clear();
@@ -1282,6 +1484,8 @@ void operstionWidget::slot_comboxPaiNumChanged(int index)
         }
 
     }
+
+    checkFaultRange();
 }
 
 void operstionWidget::slot_tableWidgetCellEntered(int row, int column)

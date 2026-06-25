@@ -79,6 +79,7 @@ private:
 
     void load_tableWidget_input_show(const QMap<QString, double> inputMap);
     void use_fmu_caculate();
+    void checkFaultRange();
 
    
 signals:
@@ -95,6 +96,8 @@ private slots:
     void slot_btnChooseFile();
     void slot_tableWigdetCheckedChanged(int row, int col);
     void slot_btn_clear_input();
+    void slot_btnFaultInput();
+    void slot_btnIsFault();
     void slot_tableWidgetCustomContextMenuRequested(const QPoint &pos);
    
    
@@ -127,6 +130,8 @@ private:
 
     fmi2::fmu * m_pFmu=nullptr;
     std::unique_ptr<cs_slave> m_pSlvae;
+   
+    QMap<QString, QPair<double, double>> m_mapFaultRange;
    
   
 };

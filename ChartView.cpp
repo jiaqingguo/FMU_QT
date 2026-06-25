@@ -62,7 +62,8 @@ void ChartView::wheelEvent(QWheelEvent* event)
 	if (event->angleDelta().y() > 0) { // 滚轮向上滚动
 		chart()->zoom(factor);
 	}
-	else { // 滚轮向下滚动
+	else
+	{ // 滚轮向下滚动
 		chart()->zoom(1 / factor);
 	}
 }

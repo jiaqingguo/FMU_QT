@@ -38,6 +38,7 @@ public:
     QHBoxLayout *horizontalLayout_2;
     QPushButton *btn_import;
     QPushButton *btn_clear_input;
+    QPushButton *btnFaultInput;
     QSpacerItem *horizontalSpacer_2;
     QHBoxLayout *horizontalLayout_5;
     QTableWidget *tableWidget_input;
@@ -49,6 +50,7 @@ public:
     QLabel *label_2;
     QComboBox *comboBox_countShow;
     QPushButton *btn_saveExecl;
+    QPushButton *btnIsFault;
     QSpacerItem *horizontalSpacer_4;
     QTableWidget *tableWidget_output;
     QHBoxLayout *horizontalLayout_3;
@@ -105,6 +107,11 @@ public:
 
         horizontalLayout_2->addWidget(btn_clear_input);
 
+        btnFaultInput = new QPushButton(groupBox_input);
+        btnFaultInput->setObjectName(QString::fromUtf8("btnFaultInput"));
+
+        horizontalLayout_2->addWidget(btnFaultInput);
+
         horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
         horizontalLayout_2->addItem(horizontalSpacer_2);
@@ -159,6 +166,11 @@ public:
 
         horizontalLayout_4->addWidget(btn_saveExecl);
 
+        btnIsFault = new QPushButton(groupBox_output);
+        btnIsFault->setObjectName(QString::fromUtf8("btnIsFault"));
+
+        horizontalLayout_4->addWidget(btnIsFault);
+
         horizontalSpacer_4 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
         horizontalLayout_4->addItem(horizontalSpacer_4);
@@ -204,12 +216,14 @@ public:
         groupBox_input->setTitle(QCoreApplication::translate("operstionWidget", "\350\276\223\345\205\245", nullptr));
         btn_import->setText(QCoreApplication::translate("operstionWidget", "\345\257\274\345\205\245\350\276\223\345\205\245\351\205\215\347\275\256", nullptr));
         btn_clear_input->setText(QCoreApplication::translate("operstionWidget", "\346\270\205\347\251\272\350\276\223\345\205\245", nullptr));
+        btnFaultInput->setText(QCoreApplication::translate("operstionWidget", "\346\225\205\351\232\234\350\276\223\345\205\245", nullptr));
         groupBox_output->setTitle(QCoreApplication::translate("operstionWidget", "\350\276\223\345\207\272", nullptr));
-        btn_calculate->setText(QCoreApplication::translate("operstionWidget", "\346\211\247\350\241\214\350\256\241\347\256\227", nullptr));
-        btn_clear->setText(QCoreApplication::translate("operstionWidget", "\346\270\205\347\251\272\350\276\223\345\207\272", nullptr));
+        btn_calculate->setText(QCoreApplication::translate("operstionWidget", "\350\256\241\347\256\227", nullptr));
+        btn_clear->setText(QCoreApplication::translate("operstionWidget", "\346\270\205\347\251\272", nullptr));
         label_2->setText(QCoreApplication::translate("operstionWidget", "\350\276\223\345\207\272\346\213\215\346\225\260\357\274\232", nullptr));
         comboBox_countShow->setCurrentText(QString());
         btn_saveExecl->setText(QCoreApplication::translate("operstionWidget", "\345\257\274\345\207\272EXECl", nullptr));
+        btnIsFault->setText(QCoreApplication::translate("operstionWidget", "\346\225\205\351\232\234\345\210\244\350\257\273", nullptr));
         btn_curve_show->setText(QCoreApplication::translate("operstionWidget", "\346\237\245\347\234\213\350\276\223\345\207\272\346\233\262\347\272\277\346\230\276\347\244\272", nullptr));
     } // retranslateUi
 
