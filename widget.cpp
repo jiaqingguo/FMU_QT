@@ -97,15 +97,16 @@ void Widget::slot_tab_changed(int index)
 
 void Widget::slot_udp_recv_data(const QByteArray& udpData)
 {
-    QString str = QString::fromUtf8(udpData);
-    qDebug() << " udp recv str : " << str;
-    // QDataStream stream(message);  // 使用 QByteArray 创建 QDataStream
+    // 校验数据有效性：远程控制指令必须恰好12字节(3个int32)
+    if (udpData.size() != 12)
+    {
+        qDebug() << "udp recv: invalid data size" << udpData.size() << ", expected 12 bytes, ignored";
+        return;
+    }
+
     QDataStream stream(udpData);
     stream.setByteOrder(QDataStream::LittleEndian); // 设置为小端序
     stream.setVersion(QDataStream::Qt_5_0);  // 设置 QDataStream 版本
-
-    //QDataStream stream(&datagram, QIODevice::ReadOnly);
-  
 
     qint32 command = 0;
     qint32 count = 0;
@@ -114,14 +115,19 @@ void Widget::slot_udp_recv_data(const QByteArray& udpData)
     // 按顺序读取三个字段
     stream >> command >> count >> interval;
 
-    qDebug() << "\n========== 解析结果 ==========";
+    // 校验命令类型：只接受 1(启动)/2(暂停)/3(停止)
+    if (command < 1 || command > 3)
+    {
+        qDebug() << "udp recv: invalid command" << command << ", ignored";
+        return;
+    }
 
+    qDebug() << "\n========== UDP远程控制指令 ==========";
     qDebug() << "命令类型:" << command;
     qDebug() << "计算次数:" << count;
     qDebug() << "周期间隔:" << interval << "ms";
     m_calculate_control_dialog->setShow(command, count, interval);
     m_calculate_control_dialog->show();
-   // slot_recv_calculate_control(command,count, interval);
 }
 
 void Widget::update_algorithm_tableWidget_out(const int& tab, const std::vector<double>& vecOutputValue)
@@ -233,7 +239,7 @@ void Widget::init_udp()
     }
 
     QByteArray warmup(1, 0);
-    m_pUdpClientManager->sendData(warmup, QHostAddress("192.168.0.147"), 8818);
+    m_pUdpClientManager->sendData(warmup, QHostAddress(targetIp), targetPort);
     if (!targetIp.isEmpty() && targetPort > 0)
         m_pUdpClientManager->sendData(warmup, QHostAddress(targetIp), targetPort);
 
