@@ -71,7 +71,7 @@ int UdpClientManager::sendData(const QByteArray& datagram)
 void UdpClientManager::setTarget(const QHostAddress& host, quint16 port)
 {
 	m_targetAddress = host;
-	m_targetPort = port;
+1	m_targetPort = port;
 }
 
 void UdpClientManager::processPendingDatagrams()
