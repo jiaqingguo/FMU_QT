@@ -195,6 +195,7 @@ void thread_pool::slot_thread_finished()
 		//emit signal_fmu_thread_finished(tab, vecOutputData);
 		// 1.2 数据及拍数；
 
+		// 完成一轮完整周期（所有算法各执行一步）时，收集最新拍数据通过UDP发送
 		if (m_runFinshNum == m_cycleFmuNum)
 		{
 			g_pWidget->sendCycleDataViaUdp();

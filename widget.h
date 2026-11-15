@@ -39,6 +39,7 @@ public:
     UdpClientManager* getUdpClientManager();
     void init_udp();
 
+    // 收集所有算法最新拍输出数据，拼接为一个double数组通过UDP发送
     void sendCycleDataViaUdp();
 protected:
     void closeEvent(QCloseEvent* event);

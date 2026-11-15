@@ -8,7 +8,7 @@ calculate_control_dialog::calculate_control_dialog(QWidget *parent) :
     ui(new Ui::calculate_control_dialog)
 {
     ui->setupUi(this);
-    setWindowTitle(QString::fromLocal8Bit("计算控制"));
+    setWindowTitle(QString::fromLocal8Bit("多模块仿真计算"));
     ui->btn_pause->setCheckable(true);
     ui->btn_pause->setEnabled(false);
     ui->btn_stop->setEnabled(false);

@@ -86,7 +86,7 @@ public:
     void retranslateUi(QWidget *Widget)
     {
         Widget->setWindowTitle(QCoreApplication::translate("Widget", "Widget", nullptr));
-        btn_calculate_control->setText(QCoreApplication::translate("Widget", "\350\256\241\347\256\227\346\216\247\345\210\266", nullptr));
+        btn_calculate_control->setText(QCoreApplication::translate("Widget", "\345\244\232\346\250\241\345\235\227\344\273\277\347\234\237\350\256\241\347\256\227", nullptr));
         btn_clearAll->setText(QCoreApplication::translate("Widget", " \346\270\205\347\251\272\346\211\200\346\234\211\347\256\227\346\263\225\350\276\223\345\207\272", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("Widget", "Tab 1", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("Widget", "Tab 2", nullptr));

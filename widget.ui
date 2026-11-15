@@ -19,7 +19,7 @@
      <item>
       <widget class="QPushButton" name="btn_calculate_control">
        <property name="text">
-        <string>计算控制</string>
+        <string>多模块仿真计算</string>
        </property>
       </widget>
      </item>
@@ -33,7 +33,7 @@
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>

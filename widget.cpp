@@ -31,7 +31,7 @@ Widget::Widget(QWidget *parent)
 {
     ui->setupUi(this);
 
-     setWindowTitle(QString::fromLocal8Bit("FMU算法验证工具"));
+     setWindowTitle(QString::fromLocal8Bit("全周期天地平行模拟系统"));
      setContextMenuPolicy(Qt::CustomContextMenu);
      m_calculate_control_dialog = new calculate_control_dialog(this);
      connect(m_calculate_control_dialog, &calculate_control_dialog::signal_calculate_control, this, &Widget::slot_recv_calculate_control);
@@ -244,29 +244,34 @@ void Widget::init_udp()
     QObject::connect(m_pUdpClientManager, &UdpClientManager::msgRecevied,this,&Widget::slot_udp_recv_data);
 }
 
+// 收集所有算法最新拍（rbegin）输出数据，按算法序号顺序拼接为一个double数组，
+// 以原始字节形式通过UDP发送。计算次数为N时，将发送N次（每个完整周期完成时触发）。
 void Widget::sendCycleDataViaUdp()
 {
     if (m_pUdpClientManager == nullptr)
         return;
 
+    // 获取全局输出数据：<算法序号, <拍数, 输出值向量>>
     const auto& allOutputData = operstionWidget::getAllOutputData();
     if (allOutputData.empty())
         return;
 
+    // 遍历每个算法，取最后拍（最新计算结果）的输出向量，按顺序拼接
     std::vector<double> vecAllData;
     for (const auto& algoPair : allOutputData)
     {
-        const auto& beatMap = algoPair.second;
+        const auto& beatMap = algoPair.second;     // <拍数, 输出向量>
         if (beatMap.empty())
             continue;
-        auto lastBeatIt = beatMap.rbegin();
-        const auto& vecOutput = lastBeatIt->second;
+        auto lastBeatIt = beatMap.rbegin();         // 最新拍（map最大key）
+        const auto& vecOutput = lastBeatIt->second; // 该拍各输出端口的值
         vecAllData.insert(vecAllData.end(), vecOutput.begin(), vecOutput.end());
     }
 
     if (vecAllData.empty())
         return;
 
+    // 将double数组转换为原始字节流发送
     QByteArray byteArray(reinterpret_cast<const char*>(vecAllData.data()),
                          static_cast<int>(vecAllData.size() * sizeof(double)));
     m_pUdpClientManager->sendData(byteArray);

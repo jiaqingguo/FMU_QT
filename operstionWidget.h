@@ -71,6 +71,7 @@ public:
     bool is_curve_show_dialog();
     void update_curve_show_dialog();
 
+    // 获取所有算法全部输出数据（static，供外部跨算法收集最新拍数据）
     static const std::map<int, std::map<int, std::vector<double>>>& getAllOutputData();
 private:
 

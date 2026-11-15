@@ -147,6 +147,7 @@ void operstionWidget::update_tableWidget_out(const std::vector<double>& vecOutpu
     ui->comboBox_countShow->setCurrentIndex(index);
 }
 
+// 返回全局输出数据静态成员引用，供外部（如Widget::sendCycleDataViaUdp）收集各算法最新拍数据
 const std::map<int, std::map<int, std::vector<double>>>& operstionWidget::getAllOutputData()
 {
     return m_mapAllOutputData;
