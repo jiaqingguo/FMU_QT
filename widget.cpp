@@ -153,8 +153,6 @@ void Widget::update_algorithhnum_opersition(const int& tab, const std::vector<do
 
         // 更新关联端口;
         pOperstionWidget->combine_relevacne_port_data(vecOutputValue);
-
-        pOperstionWidget->sendCalculateResultViaUdp(vecOutputValue);
     }
 }
 
@@ -244,6 +242,36 @@ void Widget::init_udp()
         m_pUdpClientManager->sendData(warmup, QHostAddress(targetIp), targetPort);
 
     QObject::connect(m_pUdpClientManager, &UdpClientManager::msgRecevied,this,&Widget::slot_udp_recv_data);
+}
+
+void Widget::sendCycleDataViaUdp()
+{
+    if (m_pUdpClientManager == nullptr)
+        return;
+
+    const auto& allOutputData = operstionWidget::getAllOutputData();
+    if (allOutputData.empty())
+        return;
+
+    std::vector<double> vecAllData;
+    for (const auto& algoPair : allOutputData)
+    {
+        const auto& beatMap = algoPair.second;
+        if (beatMap.empty())
+            continue;
+        auto lastBeatIt = beatMap.rbegin();
+        const auto& vecOutput = lastBeatIt->second;
+        vecAllData.insert(vecAllData.end(), vecOutput.begin(), vecOutput.end());
+    }
+
+    if (vecAllData.empty())
+        return;
+
+    QByteArray byteArray(reinterpret_cast<const char*>(vecAllData.data()),
+                         static_cast<int>(vecAllData.size() * sizeof(double)));
+    m_pUdpClientManager->sendData(byteArray);
+
+    qDebug() << "sendCycleDataViaUdp: sent" << vecAllData.size() << "doubles";
 }
 
 void Widget::closeEvent(QCloseEvent* event)

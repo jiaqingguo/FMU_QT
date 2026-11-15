@@ -147,6 +147,11 @@ void operstionWidget::update_tableWidget_out(const std::vector<double>& vecOutpu
     ui->comboBox_countShow->setCurrentIndex(index);
 }
 
+const std::map<int, std::map<int, std::vector<double>>>& operstionWidget::getAllOutputData()
+{
+    return m_mapAllOutputData;
+}
+
 std::string operstionWidget::UTF8_To_string(const std::string& str)
 {
     int nwLen = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, NULL, 0);
@@ -891,88 +896,6 @@ void operstionWidget::update_prot_data(QMap<int, double> portData)
 
 
 
-void operstionWidget::sendFmuSelectedViaUdp()
-{
-    if (g_pWidget == nullptr)
-        return;
-    UdpClientManager* pUdp = g_pWidget->getUdpClientManager();
-    if (pUdp == nullptr)
-        return;
-
-    QJsonObject json;
-    json["type"] = QStringLiteral("fmu_selected");
-    json["algorithmNum"] = m_iAlgorithmNum;
-    json["fileName"] = m_fileInfo.fileName();
-
-    QJsonArray inputPorts;
-    for (const auto& port : m_vecInputPort)
-        inputPorts.append(port);
-    json["inputPorts"] = inputPorts;
-
-    QJsonArray outputPorts;
-    if (m_mapOutputPort.contains(m_iAlgorithmNum))
-    {
-        for (const auto& port : m_mapOutputPort[m_iAlgorithmNum])
-            outputPorts.append(port);
-    }
-    json["outputPorts"] = outputPorts;
-
-    QJsonDocument doc(json);
-    QByteArray data = doc.toJson(QJsonDocument::Compact);
-    pUdp->sendData(data);
-}
-
-void operstionWidget::sendCalculateResultViaUdp(const std::vector<double>& vecOutputValue)
-{
-    if (g_pWidget == nullptr)
-        return;
-    UdpClientManager* pUdp = g_pWidget->getUdpClientManager();
-    if (pUdp == nullptr)
-        return;
-
-    QJsonObject json;
-    json["type"] = QStringLiteral("fmu_calculate");
-    json["algorithmNum"] = m_iAlgorithmNum;
-    json["fileName"] = m_fileInfo.fileName();
-
-    QJsonArray inputValues;
-    for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
-    {
-        auto pItem = ui->tableWidget_input->item(1, i);
-        inputValues.append(pItem ? pItem->text().toDouble() : 0.0);
-    }
-    json["inputValues"] = inputValues;
-
-    QJsonArray outputValues;
-    for (const auto& val : vecOutputValue)
-        outputValues.append(val);
-    json["outputValues"] = outputValues;
-
-    QJsonArray faultFlags;
-    const auto& vecOutputPorts = m_mapOutputPort[m_iAlgorithmNum];
-    for (std::size_t i = 0; i < vecOutputValue.size(); i++)
-    {
-        int flag = 1;
-        if (i < (std::size_t)vecOutputPorts.size())
-        {
-            QString portName = vecOutputPorts[i];
-            if (m_mapFaultRange.contains(portName))
-            {
-                double min = m_mapFaultRange[portName].first;
-                double max = m_mapFaultRange[portName].second;
-                if (vecOutputValue[i] < min || vecOutputValue[i] > max)
-                    flag = 0;
-            }
-        }
-        faultFlags.append(flag);
-    }
-    json["faultFlags"] = faultFlags;
-
-    QJsonDocument doc(json);
-    QByteArray data = doc.toJson(QJsonDocument::Compact);
-   pUdp->sendData(data);
-}
-
 
 void operstionWidget::slot_btnChooseFile()
 {
@@ -1029,7 +952,6 @@ void operstionWidget::slot_btnChooseFile()
     m_pSlvae->enter_initialization_mode();
     m_pSlvae->exit_initialization_mode();
 
-    sendFmuSelectedViaUdp();
 }
 
 void operstionWidget::slot_tableWigdetCheckedChanged(int row, int col)
@@ -1156,8 +1078,6 @@ void operstionWidget::slot_btnCalculate()
 
     get_relevacne_port_data();
 
-    auto vecOutput = m_mapAllOutputData[m_iAlgorithmNum][m_iCalculateCount];
-    sendCalculateResultViaUdp(vecOutput);
 }
 
 void operstionWidget::slot_btnClear()

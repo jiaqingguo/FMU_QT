@@ -71,8 +71,7 @@ public:
     bool is_curve_show_dialog();
     void update_curve_show_dialog();
 
-    void sendFmuSelectedViaUdp();
-    void sendCalculateResultViaUdp(const std::vector<double>& vecOutputValue);
+    static const std::map<int, std::map<int, std::vector<double>>>& getAllOutputData();
 private:
 
     void load_tableWidget_show();

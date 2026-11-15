@@ -195,6 +195,10 @@ void thread_pool::slot_thread_finished()
 		//emit signal_fmu_thread_finished(tab, vecOutputData);
 		// 1.2 数据及拍数；
 
+		if (m_runFinshNum == m_cycleFmuNum)
+		{
+			g_pWidget->sendCycleDataViaUdp();
+		}
 
 		//int number = pThread->get_thread_number();
 

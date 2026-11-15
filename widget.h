@@ -38,6 +38,8 @@ public:
     QExcel* get_execl_ptr();
     UdpClientManager* getUdpClientManager();
     void init_udp();
+
+    void sendCycleDataViaUdp();
 protected:
     void closeEvent(QCloseEvent* event);
 private slots:
