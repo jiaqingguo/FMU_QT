@@ -897,6 +897,93 @@ void operstionWidget::update_prot_data(QMap<int, double> portData)
 
 
 
+// 发送 FMU 选中信息到 DataServer（JSON 协议：fmu_selected，含文件名和输入/输出端口列表）
+void operstionWidget::sendFmuSelectedToDataServer()
+{
+    if (g_pWidget == nullptr)
+        return;
+    UdpClientManager* pUdp = g_pWidget->getUdpClientManager();
+    if (pUdp == nullptr)
+        return;
+
+    QJsonObject json;
+    json["type"] = QStringLiteral("fmu_selected");
+    json["algorithmNum"] = m_iAlgorithmNum;
+    json["fileName"] = m_fileInfo.fileName();
+
+    QJsonArray inputPorts;
+    for (const auto& port : m_vecInputPort)
+        inputPorts.append(port);
+    json["inputPorts"] = inputPorts;
+
+    QJsonArray outputPorts;
+    if (m_mapOutputPort.contains(m_iAlgorithmNum))
+    {
+        for (const auto& port : m_mapOutputPort[m_iAlgorithmNum])
+            outputPorts.append(port);
+    }
+    json["outputPorts"] = outputPorts;
+
+    QJsonDocument doc(json);
+    QByteArray data = doc.toJson(QJsonDocument::Compact);
+    pUdp->sendToDataServer(data);
+}
+
+// 发送单步计算结果到 DataServer（JSON 协议：fmu_calculate，含输入/输出值和故障标志）
+void operstionWidget::sendCalculateResultToDataServer(const std::vector<double>& vecOutputValue)
+{
+    if (g_pWidget == nullptr)
+        return;
+    UdpClientManager* pUdp = g_pWidget->getUdpClientManager();
+    if (pUdp == nullptr)
+        return;
+
+    QJsonObject json;
+    json["type"] = QStringLiteral("fmu_calculate");
+    json["algorithmNum"] = m_iAlgorithmNum;
+    json["fileName"] = m_fileInfo.fileName();
+
+    QJsonArray inputValues;
+    for (int i = 0; i < ui->tableWidget_input->columnCount(); i++)
+    {
+        auto pItem = ui->tableWidget_input->item(1, i);
+        inputValues.append(pItem ? pItem->text().toDouble() : 0.0);
+    }
+    json["inputValues"] = inputValues;
+
+    QJsonArray outputValues;
+    for (const auto& val : vecOutputValue)
+        outputValues.append(val);
+    json["outputValues"] = outputValues;
+
+    // 故障标志：超出门限值则标记为0
+    QJsonArray faultFlags;
+    if (m_mapOutputPort.contains(m_iAlgorithmNum))
+    {
+        const auto& vecOutputPorts = m_mapOutputPort[m_iAlgorithmNum];
+        for (std::size_t i = 0; i < vecOutputValue.size(); i++)
+        {
+            int flag = 1;
+            if (i < (std::size_t)vecOutputPorts.size())
+            {
+                QString portName = vecOutputPorts[i];
+                if (m_mapFaultRange.contains(portName))
+                {
+                    double min = m_mapFaultRange[portName].first;
+                    double max = m_mapFaultRange[portName].second;
+                    if (vecOutputValue[i] < min || vecOutputValue[i] > max)
+                        flag = 0;
+                }
+            }
+            faultFlags.append(flag);
+        }
+    }
+    json["faultFlags"] = faultFlags;
+
+    QJsonDocument doc(json);
+    QByteArray data = doc.toJson(QJsonDocument::Compact);
+    pUdp->sendToDataServer(data);
+}
 
 void operstionWidget::slot_btnChooseFile()
 {
@@ -953,6 +1040,7 @@ void operstionWidget::slot_btnChooseFile()
     m_pSlvae->enter_initialization_mode();
     m_pSlvae->exit_initialization_mode();
 
+    sendFmuSelectedToDataServer();
 }
 
 void operstionWidget::slot_tableWigdetCheckedChanged(int row, int col)
@@ -1079,6 +1167,9 @@ void operstionWidget::slot_btnCalculate()
 
     get_relevacne_port_data();
 
+    // 发送单步计算结果到 DataServer
+    auto vecOutput = m_mapAllOutputData[m_iAlgorithmNum][m_iCalculateCount];
+    sendCalculateResultToDataServer(vecOutput);
 }
 
 void operstionWidget::slot_btnClear()

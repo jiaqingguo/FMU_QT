@@ -153,6 +153,9 @@ void Widget::update_algorithhnum_opersition(const int& tab, const std::vector<do
 
         // 更新关联端口;
         pOperstionWidget->combine_relevacne_port_data(vecOutputValue);
+
+        // 将单步计算结果通过 JSON 协议发送到 DataServer
+        pOperstionWidget->sendCalculateResultToDataServer(vecOutputValue);
     }
 }
 
@@ -213,6 +216,8 @@ void Widget::init_udp()
     int listenPort = 36520;
     QString targetIp;
     int targetPort = 0;
+    QString dataServerIp = "127.0.0.1";
+    int dataServerPort = 8818;
 
     if (QFile::exists(iniPath))
     {
@@ -220,8 +225,12 @@ void Widget::init_udp()
         listenPort = settings.value("Udp/ListenPort", 36520).toInt();
         targetIp = settings.value("Udp/TargetIp", "").toString();
         targetPort = settings.value("Udp/TargetPort", 0).toInt();
+        // 读取 DataServer 目标配置，用于发送 JSON 协议数据（fmu_selected / fmu_calculate）
+        dataServerIp = settings.value("DataServer/Ip", "127.0.0.1").toString();
+        dataServerPort = settings.value("DataServer/Port", 8818).toInt();
         qDebug() << "read config.ini: ListenPort=" << listenPort
-                 << "TargetIp=" << targetIp << "TargetPort=" << targetPort;
+                 << "TargetIp=" << targetIp << "TargetPort=" << targetPort
+                 << "DataServerIp=" << dataServerIp << "DataServerPort=" << dataServerPort;
     }
     else
     {
@@ -231,9 +240,16 @@ void Widget::init_udp()
     m_pUdpClientManager = new UdpClientManager;
     m_pUdpClientManager->startListen(listenPort);
 
+    // 遥控软件目标（接收组合 double 数组）
     if (!targetIp.isEmpty() && targetPort > 0)
     {
         m_pUdpClientManager->setTarget(QHostAddress(targetIp), targetPort);
+    }
+
+    // DataServer 目标（接收 JSON 协议：fmu_selected / fmu_calculate）
+    if (!dataServerIp.isEmpty() && dataServerPort > 0)
+    {
+        m_pUdpClientManager->setDataServerTarget(QHostAddress(dataServerIp), dataServerPort);
     }
 
     QByteArray warmup(1, 0);
@@ -444,6 +460,10 @@ bool Widget::load_xml_configuration()
             }
 
             pWidget->load_data_conguration(vecInputPort, vecInputValueReference, vecInputValue, vecOutputPort, vecOutputValueReference);
+
+            // XML 批量加载时，每加载一个 FMU 就通知 DataServer
+            pWidget->sendFmuSelectedToDataServer();
+
             if (mapRelevance.size() > 0)
             {
                 pWidget->load_relevance_conguration(mapRelevance);

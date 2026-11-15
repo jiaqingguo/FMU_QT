@@ -73,6 +73,11 @@ public:
 
     // 获取所有算法全部输出数据（static，供外部跨算法收集最新拍数据）
     static const std::map<int, std::map<int, std::vector<double>>>& getAllOutputData();
+
+    // 发送 FMU 选中信息到 DataServer（JSON 协议：fmu_selected）
+    void sendFmuSelectedToDataServer();
+    // 发送单步计算结果到 DataServer（JSON 协议：fmu_calculate）
+    void sendCalculateResultToDataServer(const std::vector<double>& vecOutputValue);
 private:
 
     void load_tableWidget_show();

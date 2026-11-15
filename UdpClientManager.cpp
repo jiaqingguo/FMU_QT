@@ -74,6 +74,25 @@ void UdpClientManager::setTarget(const QHostAddress& host, quint16 port)
 	m_targetPort = port;
 }
 
+// 设置 DataServer 目标地址和端口
+void UdpClientManager::setDataServerTarget(const QHostAddress& host, quint16 port)
+{
+	m_dataServerAddress = host;
+	m_dataServerPort = port;
+}
+
+// 发送数据到 DataServer（JSON 协议：fmu_selected / fmu_calculate）
+int UdpClientManager::sendToDataServer(const QByteArray& datagram)
+{
+	if (m_dataServerPort != 0)
+	{
+		int nLen = m_udpSocket->writeDatagram(datagram, m_dataServerAddress, m_dataServerPort);
+		qDebug() << "udp send to DataServer len: " << nLen;
+		return nLen;
+	}
+	return 0;
+}
+
 void UdpClientManager::processPendingDatagrams()
 {
 	while(m_udpSocket->hasPendingDatagrams())
