@@ -61,6 +61,8 @@ graphDialog::~graphDialog()
 void graphDialog::setDataShow(const QString& title, const int paiNum, const QMap<int, QVector<double>> &mapData)
 {
     QList<QColor> colors=m_colors;
+    // 记录清除前是否已有图形，用于保留用户缩放状态
+    bool hadGraphs = (ui->plot->graphCount() > 0);
     // 直接清除所有图形
     ui->plot->clearGraphs();
     ui->plot->replot(); // 重绘图表以更新视图
@@ -72,7 +74,9 @@ void graphDialog::setDataShow(const QString& title, const int paiNum, const QMap
 
     double maxValue = 2;
 
-    bool ret = false;
+    // 如果之前已有图形（数据更新），则仅扩展轴范围而不重置，保留用户缩放状态
+    // 首次加载（无图形）时使用 false 完整缩放以适配数据
+    bool ret = hadGraphs;
     // 遍历mapData中的每一个键值对，为每一个键创建一条曲线
     for (auto it = mapData.begin(); it != mapData.end(); ++it) 
     {

@@ -5,6 +5,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += c++17
 DEFINES += NOMINMAX
 
+TARGET = FullCycleSpaceSim
+
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -21,7 +23,6 @@ SOURCES += \
     Logger.cpp \
     UdpClientManager.cpp \
     addValueDialog.cpp \
-    appkey.cpp \
     calculate_control_dialog.cpp \
     calculate_control_dialog.cpp \
     curveShowDialog.cpp \
@@ -29,7 +30,6 @@ SOURCES += \
     graphdialog.cpp \
     main.cpp \
     operstionWidget.cpp \
-    qcustomplot.cpp \
     qexcel.cpp \
     thread_pool.cpp \
     widget.cpp
@@ -39,14 +39,12 @@ HEADERS += \
     Logger.h \
     UdpClientManager.h \
     addValueDialog.h \
-    appkey.h \
     calculate_control_dialog.h \
     calculate_control_dialog.h \
     curveShowDialog.h \
     fum_thread.h \
     graphdialog.h \
     operstionWidget.h \
-    qcustomplot.h \
     qexcel.h \
     thread_pool.h \
     widget.h
@@ -69,7 +67,11 @@ win32:CONFIG(release, debug|release): LIBS += -L$$PWD/fmu/lib/ -lfmi4cpp
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/fmu/lib/ -lfmi4cppd
 else:unix: LIBS += -L$$PWD/fmu/lib/ -lfmi4cpp
 
-INCLUDEPATH += $$PWD/fmu/include
+# QCustomPlot debug lib
+win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/QCustomPlot/lib/ -lQCustomPlot
+
+INCLUDEPATH += $$PWD/fmu/include \
+               $$PWD/QCustomPlot/include
 DEPENDPATH += $$PWD/fmu/include
 
 win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/fmu/lib/libfmi4cpp.a
